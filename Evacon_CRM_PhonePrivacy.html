@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>إدارة الطلبات العقارية</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b2430;--mu:#6b7684;--bd:#e3e7ec;--ac:#0f6e56;--acb:#e1f5ee;--new:#2563eb;--newb:#e6efff;--done:#6b7684;--doneb:#eceff2;--dg:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181d;--card:#1e242b;--tx:#e8ecf0;--mu:#9aa5b1;--bd:#2f3740;--ac:#3ecf9e;--acb:#173d31;--new:#7aa7ff;--newb:#1c2d4d;--done:#9aa5b1;--doneb:#2a3139;--dg:#ff7a6b}}
+:root[data-theme="dark"]{--bg:#14181d;--card:#1e242b;--tx:#e8ecf0;--mu:#9aa5b1;--bd:#2f3740;--ac:#3ecf9e;--acb:#173d31;--new:#7aa7ff;--newb:#1c2d4d;--done:#9aa5b1;--doneb:#2a3139;--dg:#ff7a6b}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6}
+.w{max-width:960px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:20px;margin:0}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 12px}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.st{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.s{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;text-align:center}
+.s b{display:block;font-size:22px}.s span{font-size:12px;color:var(--mu)}
+.tb{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tb button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+input,select,textarea{font:inherit;width:100%;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+.f{display:flex;gap:8px;margin-bottom:12px}.f input{flex:2}.f select{flex:1}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:10px}
+.c h3{margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.m{color:var(--mu);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.n{margin:6px 0 0;font-size:14px}
+.bd{font-size:12px;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.bd.new{background:var(--newb);color:var(--new)}.bd.act{background:var(--acb);color:var(--ac)}.bd.done{background:var(--doneb);color:var(--done)}
+.pr{color:var(--dg);font-size:12px}
+.ac{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.ac button{padding:4px 10px;font-size:13px}
+.em{text-align:center;color:var(--mu);padding:30px}
+dialog{border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--tx);width:min(94vw,460px);padding:16px}
+dialog::backdrop{background:#0008}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}.g .fl{grid-column:1/-1}
+label{font-size:12px;color:var(--mu);display:block}
+.sy{font-size:12px;color:var(--mu);text-align:center;margin-top:10px}
+@media(max-width:520px){.st{grid-template-columns:repeat(2,1fr)}.g{grid-template-columns:1fr}}
+
+.loginbox{max-width:420px;margin:10vh auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px}
+.loginbox h2{margin:0 0 8px}.loginbox label{margin-top:10px}.loginbox button{width:100%;margin-top:12px}
+#app{display:none}.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<section class="loginbox" id="loginbox">
+<h2>🏢 Evacon | تسجيل الدخول</h2>
+<p class="m">سجّل الدخول بحساب الموظف للوصول إلى الطلبات العقارية.</p>
+<label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" placeholder="name@company.com">
+<label for="password">كلمة المرور</label><input id="password" type="password" autocomplete="current-password" placeholder="كلمة المرور"><label for="accountType">نوع الحساب</label><select id="accountType"><option value="user">مستخدم عادي</option><option value="admin">أدمن</option></select>
+<button class="p" id="login">تسجيل الدخول</button><div class="sy" id="loginmsg"></div>
+</section>
+<div id="app"><div class="w">
+<header><h1>🏢 إدارة الطلبات</h1><div class="top-actions"><button id="logout">تسجيل الخروج</button><button class="p" id="add">+ طلب جديد</button></div></header>
+<div class="st" id="st"></div>
+<div class="tb" id="tb"></div><div class="tb"><button id="showRequests" class="on">الطلبات</button><button id="showLogs" style="display:none">سجل النشاط</button><span class="m" id="roleLabel"></span></div>
+<div class="f"><input id="q" placeholder="ابحث بالاسم أو الموبايل أو المنطقة…"><select id="ag"><option value="">كل الموظفين</option></select></div>
+<div id="ls"></div><section id="logs" style="display:none"><div class="f"><select id="logType"><option value="">كل الأنشطة</option><option value="login">تسجيل دخول</option><option value="logout">تسجيل خروج</option><option value="request_created">إضافة طلب</option><option value="request_updated">تعديل طلب</option><option value="request_deleted">حذف طلب</option><option value="request_completed">إنهاء طلب</option></select><input id="logSearch" placeholder="ابحث باسم الموظف أو التفاصيل"></div><div id="logList"></div></section>
+<div class="sy" id="sy"></div>
+</div></div>
+<dialog id="dg"><form method="dialog" id="fm" style="margin:0">
+<h3 id="dt" style="margin-top:0">طلب جديد</h3>
+<div class="g">
+<div><label>اسم العميل</label><input id="nm" required></div>
+<div id="phoneField"><label>رقم الموبايل</label><input id="ph" inputmode="tel" autocomplete="off"></div>
+<div><label>نوع الطلب</label><select id="ty"><option>شراء</option><option>إيجار</option><option>بيع (مالك)</option><option>تأجير (مالك)</option></select></div>
+<div><label>نوع العقار</label><select id="pt"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>محل</option><option>مكتب</option><option>أرض</option></select></div>
+<div><label>المنطقة</label><input id="ar"></div>
+<div><label>الميزانية</label><input id="bu" inputmode="numeric"></div>
+<div><label>الموظف المسؤول</label><input id="am"></div>
+<div><label>الأولوية</label><select id="pr"><option>عادية</option><option>عاجلة</option></select></div>
+<div class="fl"><label>ملاحظات</label><textarea id="no" rows="3"></textarea></div>
+</div>
+<div class="ac"><button class="p" id="sv" type="submit">حفظ</button><button type="button" id="cn">إلغاء</button></div>
+</form></dialog>
+<dialog id="feedbackDialog"><form method="dialog" id="feedbackForm"><h3>إنهاء الطلب</h3><label>سبب انتهاء الطلب</label><select id="feedbackReason"><option>تم البيع بنجاح</option><option>العميل اشترى من مكان آخر</option><option>العميل ألغى الطلب</option><option>عدم توافر العقار المناسب</option><option>العميل لم يعد مهتماً</option><option>سبب آخر</option></select><label>تفاصيل إضافية</label><textarea id="feedbackDetails" rows="3"></textarea><div class="ac"><button class="p" type="submit">تأكيد الإنهاء</button><button type="button" id="feedbackCancel">إلغاء</button></div></form></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+const SUPABASE_URL="https://fqktvstobrdvlsluskrq.supabase.co";
+const SUPABASE_KEY="sb_publishable_u3qbc1qmCejJ9HlipmA_sauH3j7S";
+const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id), ST={new:"جديد",act:"نشط",done:"منتهي"};
+let data=[],logs=[],tab="all",role="user",currentUser=null,editId=null,channel=null,finishId=null,view="requests";
+const isAdmin=()=>role==="admin";
+function esc(v){return String(v??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function say(id,t){$(id).textContent=t}
+function date(v){return v?new Date(v).toLocaleString("ar-EG"):"—"}
+function fromDb(x){return {...x,id:x.id,createdAt:Number(x.created_at)||Date.now(),updatedAt:Number(x.updated_at)||Date.now()}}
+function toDb(id,o){return {id,name:o.name,phone:o.phone,type:o.type,ptype:o.ptype,area:o.area,budget:o.budget,agent:o.agent,priority:o.priority,notes:o.notes,status:o.status,feedback_reason:o.feedback_reason||null,feedback_details:o.feedback_details||null,created_at:o.createdAt,updated_at:o.updatedAt}}
+async function logEvent(action,details={}){try{await client.rpc("log_user_activity",{p_action:action,p_details:details})}catch(e){console.warn("Activity log:",e.message)}}
+async function load(){say("sy","جارٍ تحميل الطلبات...");let {data:rows,error}=await client.rpc("get_requests_for_current_user");if(error){say("sy","تعذر تحميل الطلبات: "+error.message);return}data=(rows||[]).map(fromDb);render();say("sy","🟢 متصل بقاعدة بيانات Evacon")}
+async function save(id,o){say("sy","جارٍ الحفظ...");let {error}=await client.from("requests").upsert(toDb(id,o));if(error){alert("فشل الحفظ: "+error.message);return}$("dg").close();await load()}
+async function removeRequest(id){if(!confirm("حذف الطلب نهائيًا؟"))return;let {error}=await client.from("requests").delete().eq("id",id);if(error){alert("تعذر الحذف: "+error.message);return}await load()}
+function render(){
+ $("add").style.display="";$("showLogs").style.display=isAdmin()?"":"none";$("roleLabel").textContent=(isAdmin()?"الأدمن":"مستخدم عادي")+" — "+(currentUser?.email||"");
+ const counts={all:data.length,new:0,act:0,done:0};data.forEach(r=>{if(counts[r.status]!==undefined)counts[r.status]++});
+ $("st").innerHTML=[["all","الكل"],["new","جديد"],["act","نشط"],["done","منتهي"]].map(a=>`<div class="s"><b>${counts[a[0]]}</b><span>${a[1]}</span></div>`).join("");
+ $("tb").innerHTML=[["all","الكل"],["new","الجديدة"],["act","النشطة"],["done","المنتهية"]].map(a=>`<button data-t="${a[0]}" class="${tab===a[0]?"on":""}">${a[1]} (${counts[a[0]]})</button>`).join("");
+ const agents=[...new Set(data.map(r=>r.agent).filter(Boolean))],cur=$("ag").value;$("ag").innerHTML='<option value="">كل الموظفين</option>'+agents.map(a=>`<option ${a===cur?'selected':''}>${esc(a)}</option>`).join("");
+ const q=$("q").value.trim().toLowerCase(),ag=$("ag").value;
+ const list=data.filter(r=>(tab==="all"||r.status===tab)&&(!ag||r.agent===ag)&&(!q||(r.name+" "+r.phone+" "+r.area).toLowerCase().includes(q))).sort((a,b)=>(b.priority==="عاجلة"&&b.status!=="done")-(a.priority==="عاجلة"&&a.status!=="done")||(b.createdAt-a.createdAt));
+ $("ls").innerHTML=list.length?list.map(r=>{let actions="";if(isAdmin()){if(r.status!=="done")actions+=`<button data-a="finish" data-i="${esc(r.id)}">✔ إنهاء الطلب</button>`;else actions+=`<button data-a="reopen" data-i="${esc(r.id)}">↺ إعادة فتح</button>`;actions+=`<button data-a="edit" data-i="${esc(r.id)}">تعديل</button><button data-a="del" data-i="${esc(r.id)}">حذف</button>`}return `<div class="c"><h3><span>${esc(r.name)} ${r.priority==="عاجلة"&&r.status!=="done"?'<span class="pr">● عاجل</span>':''}</span><span class="bd ${esc(r.status)}">${ST[r.status]||"غير محدد"}</span></h3><div class="m"><span>${esc(r.type)} · ${esc(r.ptype)}</span>${r.area?`<span>📍 ${esc(r.area)}</span>`:""}${r.budget?`<span>💰 ${esc(r.budget)}</span>`:""}${isAdmin()&&r.phone?`<span>📞 ${esc(r.phone)}</span>`:""}${r.agent?`<span>👤 ${esc(r.agent)}</span>`:""}<span>🗓 ${date(r.createdAt)}</span></div>${r.notes?`<p class="n">${esc(r.notes)}</p>`:""}${r.status==="done"&&r.feedback_reason?`<p class="n"><b>سبب الإنهاء:</b> ${esc(r.feedback_reason)} ${esc(r.feedback_details||"")}</p>`:""}<div class="ac">${actions}${isAdmin()&&r.phone?`<a href="tel:${esc(r.phone)}"><button type="button">اتصال</button></a>`:""}</div></div>`}).join(""):'<div class="em">مفيش طلبات هنا</div>';
+}
+function openForm(r){editId=r?.id||null;$('dt').textContent=r?'تعديل الطلب':'طلب جديد';$('phoneField').style.display=isAdmin()?'':'none';const fields={nm:'name',ph:'phone',ar:'area',bu:'budget',am:'agent',no:'notes'};Object.keys(fields).forEach(k=>$(k).value=r?.[fields[k]]||'');$('ty').value=r?.type||'شراء';$('pt').value=r?.ptype||'شقة';$('pr').value=r?.priority||'عادية';$('dg').showModal()}
+async function loadLogs(){if(!isAdmin())return;let {data:rows,error}=await client.from('activity_logs').select('*').order('created_at',{ascending:false}).limit(300);if(error){$('logList').innerHTML='<div class="em">تعذر تحميل السجلات: '+esc(error.message)+'</div>';return}logs=rows||[];renderLogs()}
+function renderLogs(){let type=$('logType').value,q=$('logSearch').value.toLowerCase();let rows=logs.filter(x=>(!type||x.action===type)&&(!q||((x.user_email||'')+' '+JSON.stringify(x.details||{})).toLowerCase().includes(q)));$('logList').innerHTML=rows.length?rows.map(x=>`<div class="c"><h3>${esc(({login:'تسجيل دخول',logout:'تسجيل خروج',request_created:'إضافة طلب',request_updated:'تعديل طلب',request_deleted:'حذف طلب',request_completed:'إنهاء طلب'})[x.action]||x.action)}</h3><div class="m"><span>👤 ${esc(x.user_email||'مستخدم غير معروف')}</span><span>🕒 ${date(x.created_at)}</span></div><p class="n">${esc(JSON.stringify(x.details||{}))}</p></div>`).join(''):'<div class="em">لا توجد سجلات</div>'}
+async function setView(v){view=v;$('ls').style.display=v==='requests'?'':'none';$('st').style.display=v==='requests'?'':'none';$('tb').style.display=v==='requests'?'':'none';$('q').parentElement.style.display=v==='requests'?'':'none';$('logs').style.display=v==='logs'?'':'none';$('showRequests').classList.toggle('on',v==='requests');$('showLogs').classList.toggle('on',v==='logs');if(v==='logs')await loadLogs()}
+async function enterApp(user){currentUser=user;let {data:profile,error}=await client.from('profiles').select('role,full_name').eq('id',user.id).single();if(error||!profile){await client.auth.signOut();say('loginmsg','الحساب غير مضاف إلى profiles. اطلب من مدير النظام تعيين صلاحيتك.');return}role=profile.role;$('loginbox').style.display='none';$('app').style.display='block';$('q').placeholder=isAdmin()?'ابحث بالاسم أو الموبايل أو المنطقة…':'ابحث بالاسم أو المنطقة…';await load();await setView('requests')}
+async function showLogin(){$('app').style.display='none';$('loginbox').style.display='block'}
+$('login').onclick=async()=>{let email=$('email').value.trim(),password=$('password').value;if(!email||!password){say('loginmsg','اكتب البريد الإلكتروني وكلمة المرور');return}say('loginmsg','جارٍ تسجيل الدخول...');let {data,error}=await client.auth.signInWithPassword({email,password});if(error){say('loginmsg','تعذر تسجيل الدخول: '+error.message);return}let {data:prof}=await client.from('profiles').select('role').eq('id',data.user.id).single();if(!prof||prof.role!==$('accountType').value){await client.auth.signOut();say('loginmsg','نوع الحساب المختار لا يطابق صلاحية هذا المستخدم.');return}await logEvent('login',{email});await enterApp(data.user)};
+$('logout').onclick=async()=>{await logEvent('logout',{});await client.auth.signOut();data=[];await showLogin();say('loginmsg','تم تسجيل الخروج')};
+$('add').onclick=()=>openForm(null);$('cn').onclick=()=>$('dg').close();$('feedbackCancel').onclick=()=>$('feedbackDialog').close();
+$('fm').onsubmit=async e=>{e.preventDefault();if(editId&&!isAdmin()){alert('ليس لديك صلاحية التعديل');return}let old=editId?data.find(x=>x.id===editId):null;let o={name:$('nm').value.trim(),phone:isAdmin()?$('ph').value.trim():null,type:$('ty').value,ptype:$('pt').value,area:$('ar').value.trim(),budget:$('bu').value.trim(),agent:$('am').value.trim(),priority:$('pr').value,notes:$('no').value.trim(),status:old?.status||'new',createdAt:old?.createdAt||Date.now(),updatedAt:Date.now(),feedback_reason:old?.feedback_reason||null,feedback_details:old?.feedback_details||null};if(!o.name)return;await save(editId||('r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),o)};
+$('feedbackForm').onsubmit=async e=>{e.preventDefault();if(!isAdmin()||!finishId)return;let reason=$('feedbackReason').value,details=$('feedbackDetails').value.trim();let {error}=await client.from('requests').update({status:'done',feedback_reason:reason,feedback_details:details,updated_at:Date.now()}).eq('id',finishId);if(error){alert('تعذر إنهاء الطلب: '+error.message);return}$('feedbackDialog').close();$('feedbackDetails').value='';finishId=null;await load()};
+$('tb').onclick=e=>{let t=e.target.getAttribute('data-t');if(t){tab=t;render()}};$('q').oninput=render;$('ag').onchange=render;
+$('ls').onclick=e=>{let b=e.target.closest('button[data-a]');if(!b)return;let a=b.dataset.a,id=b.dataset.i;if(!isAdmin())return;if(a==='edit')openForm(data.find(x=>x.id===id));if(a==='del')removeRequest(id);if(a==='finish'){finishId=id;$('feedbackDialog').showModal()}if(a==='reopen'){client.from('requests').update({status:'act',feedback_reason:null,feedback_details:null,updated_at:Date.now()}).eq('id',id).then(({error})=>error?alert(error.message):load())}};
+$('showRequests').onclick=()=>setView('requests');$('showLogs').onclick=()=>isAdmin()&&setView('logs');$('logType').onchange=renderLogs;$('logSearch').oninput=renderLogs;
+client.auth.getSession().then(async r=>{if(r.data.session)await enterApp(r.data.session.user);else await showLogin()});client.auth.onAuthStateChange(async(event,session)=>{if(event==='SIGNED_OUT')await showLogin()});
+})();
+</script>
+</body>
+</html>

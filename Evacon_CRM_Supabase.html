@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>إدارة الطلبات العقارية</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b2430;--mu:#6b7684;--bd:#e3e7ec;--ac:#0f6e56;--acb:#e1f5ee;--new:#2563eb;--newb:#e6efff;--done:#6b7684;--doneb:#eceff2;--dg:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181d;--card:#1e242b;--tx:#e8ecf0;--mu:#9aa5b1;--bd:#2f3740;--ac:#3ecf9e;--acb:#173d31;--new:#7aa7ff;--newb:#1c2d4d;--done:#9aa5b1;--doneb:#2a3139;--dg:#ff7a6b}}
+:root[data-theme="dark"]{--bg:#14181d;--card:#1e242b;--tx:#e8ecf0;--mu:#9aa5b1;--bd:#2f3740;--ac:#3ecf9e;--acb:#173d31;--new:#7aa7ff;--newb:#1c2d4d;--done:#9aa5b1;--doneb:#2a3139;--dg:#ff7a6b}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6}
+.w{max-width:960px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+h1{font-size:20px;margin:0}
+button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 12px}
+button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
+.st{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.s{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;text-align:center}
+.s b{display:block;font-size:22px}.s span{font-size:12px;color:var(--mu)}
+.tb{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tb button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+input,select,textarea{font:inherit;width:100%;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
+.f{display:flex;gap:8px;margin-bottom:12px}.f input{flex:2}.f select{flex:1}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:10px}
+.c h3{margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.m{color:var(--mu);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 14px}
+.n{margin:6px 0 0;font-size:14px}
+.bd{font-size:12px;padding:2px 10px;border-radius:99px;white-space:nowrap}
+.bd.new{background:var(--newb);color:var(--new)}.bd.act{background:var(--acb);color:var(--ac)}.bd.done{background:var(--doneb);color:var(--done)}
+.pr{color:var(--dg);font-size:12px}
+.ac{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.ac button{padding:4px 10px;font-size:13px}
+.em{text-align:center;color:var(--mu);padding:30px}
+dialog{border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--tx);width:min(94vw,460px);padding:16px}
+dialog::backdrop{background:#0008}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}.g .fl{grid-column:1/-1}
+label{font-size:12px;color:var(--mu);display:block}
+.sy{font-size:12px;color:var(--mu);text-align:center;margin-top:10px}
+@media(max-width:520px){.st{grid-template-columns:repeat(2,1fr)}.g{grid-template-columns:1fr}}
+
+.loginbox{max-width:420px;margin:10vh auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px}
+.loginbox h2{margin:0 0 8px}.loginbox label{margin-top:10px}.loginbox button{width:100%;margin-top:12px}
+#app{display:none}.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<section class="loginbox" id="loginbox">
+<h2>🏢 Evacon | تسجيل الدخول</h2>
+<p class="m">سجّل الدخول بحساب الموظف للوصول إلى الطلبات العقارية.</p>
+<label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" placeholder="name@company.com">
+<label for="password">كلمة المرور</label><input id="password" type="password" autocomplete="current-password" placeholder="كلمة المرور">
+<button class="p" id="login">تسجيل الدخول</button><div class="sy" id="loginmsg"></div>
+</section>
+<div id="app"><div class="w">
+<header><h1>🏢 إدارة الطلبات</h1><div class="top-actions"><button id="logout">تسجيل الخروج</button><button class="p" id="add">+ طلب جديد</button></div></header>
+<div class="st" id="st"></div>
+<div class="tb" id="tb"></div>
+<div class="f"><input id="q" placeholder="ابحث بالاسم أو الموبايل أو المنطقة…"><select id="ag"><option value="">كل الموظفين</option></select></div>
+<div id="ls"></div>
+<div class="sy" id="sy"></div>
+</div></div>
+<dialog id="dg"><form method="dialog" id="fm" style="margin:0">
+<h3 id="dt" style="margin-top:0">طلب جديد</h3>
+<div class="g">
+<div><label>اسم العميل</label><input id="nm" required></div>
+<div><label>الموبايل</label><input id="ph" inputmode="tel"></div>
+<div><label>نوع الطلب</label><select id="ty"><option>شراء</option><option>إيجار</option><option>بيع (مالك)</option><option>تأجير (مالك)</option></select></div>
+<div><label>نوع العقار</label><select id="pt"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>محل</option><option>مكتب</option><option>أرض</option></select></div>
+<div><label>المنطقة</label><input id="ar"></div>
+<div><label>الميزانية</label><input id="bu" inputmode="numeric"></div>
+<div><label>الموظف المسؤول</label><input id="am"></div>
+<div><label>الأولوية</label><select id="pr"><option>عادية</option><option>عاجلة</option></select></div>
+<div class="fl"><label>ملاحظات</label><textarea id="no" rows="3"></textarea></div>
+</div>
+<div class="ac"><button class="p" id="sv" type="submit">حفظ</button><button type="button" id="cn">إلغاء</button></div>
+</form></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function(){
+const SUPABASE_URL = "https://fqktvstobrdvlsluskrq.supabase.co";
+const SUPABASE_KEY = "sb_publishable_u3qbc1qmCejJ9Hlip5wjmA_sauH3j7S";
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var ST={new:"جديد",act:"نشط",done:"منتهي"};
+var data=[],tab="all",admin=true,editId=null,channel=null;
+var $=function(i){return document.getElementById(i)};
+function esc(s){return String(s==null?"":s).replace(/[&<>\"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fd(t){return t?new Date(Number(t)).toLocaleDateString("ar-EG",{day:"numeric",month:"short"}):""}
+function message(el,txt){$(el).textContent=txt}
+function rowFromDb(x){return {id:x.id,name:x.name,phone:x.phone||"",type:x.type||"شراء",ptype:x.ptype||"شقة",area:x.area||"",budget:x.budget||"",agent:x.agent||"",priority:x.priority||"عادية",notes:x.notes||"",status:x.status||"new",createdAt:Number(x.created_at)||Date.now(),updatedAt:Number(x.updated_at)||Date.now()}}
+function rowToDb(id,o){return {id:id,name:o.name,phone:o.phone,type:o.type,ptype:o.ptype,area:o.area,budget:o.budget,agent:o.agent,priority:o.priority,notes:o.notes,status:o.status,created_at:o.createdAt,updated_at:o.updatedAt}}
+async function load(){
+ message("sy","جارٍ تحميل الطلبات...");
+ const {data:rows,error}=await client.from("requests").select("*").order("created_at",{ascending:false});
+ if(error){message("sy","تعذر تحميل البيانات: "+error.message);return}
+ data=(rows||[]).map(rowFromDb);render();message("sy","🟢 متصل بقاعدة بيانات Evacon");
+}
+async function save(id,obj){
+ message("sy","جارٍ حفظ الطلب...");
+ const {error}=await client.from("requests").upsert(rowToDb(id,obj));
+ if(error){message("sy","فشل الحفظ: "+error.message);alert("لم يتم حفظ الطلب: "+error.message);return}
+ $("dg").close();await load();
+}
+async function setStatus(id,s){
+ const {error}=await client.from("requests").update({status:s,updated_at:Date.now()}).eq("id",id);
+ if(error){alert("تعذر تحديث الحالة: "+error.message);return} await load();
+}
+async function del(id){
+ if(!confirm("حذف الطلب نهائيًا؟"))return;
+ const {error}=await client.from("requests").delete().eq("id",id);
+ if(error){alert("تعذر حذف الطلب: "+error.message);return} await load();
+}
+function render(){
+ $("add").style.display=admin?"":"none";
+ var c={all:data.length,new:0,act:0,done:0};data.forEach(function(r){if(c[r.status]!==undefined)c[r.status]++});
+ $("st").innerHTML=[["all","الكل"],["new","جديد"],["act","نشط"],["done","منتهي"]].map(function(a){return '<div class="s"><b>'+c[a[0]]+'</b><span>'+a[1]+'</span></div>'}).join("");
+ $("tb").innerHTML=[["all","الكل"],["new","الجديدة"],["act","النشطة"],["done","المنتهية"]].map(function(a){return '<button data-t="'+a[0]+'" class="'+(tab===a[0]?"on":"")+'">'+a[1]+' ('+c[a[0]]+')</button>'}).join("");
+ var ags={};data.forEach(function(r){if(r.agent)ags[r.agent]=1});var cur=$("ag").value;
+ $("ag").innerHTML='<option value="">كل الموظفين</option>'+Object.keys(ags).map(function(a){return '<option'+(a===cur?' selected':'')+'>'+esc(a)+'</option>'}).join("");
+ var q=$("q").value.trim().toLowerCase(),ag=$("ag").value;
+ var l=data.filter(function(r){if(tab!=="all"&&r.status!==tab)return false;if(ag&&r.agent!==ag)return false;if(q&&(r.name+" "+r.phone+" "+r.area).toLowerCase().indexOf(q)<0)return false;return true}).sort(function(a,b){var pa=a.priority==="عاجلة"&&a.status!=="done"?1:0,pb=b.priority==="عاجلة"&&b.status!=="done"?1:0;return pb-pa||(b.createdAt||0)-(a.createdAt||0)});
+ $("ls").innerHTML=l.length?l.map(function(r){var b="";if(r.status==="new")b='<button data-a="act" data-i="'+esc(r.id)+'">▶ ابدأ العمل</button>';if(r.status==="act")b='<button data-a="done" data-i="'+esc(r.id)+'">✔ تم الإنجاز</button>';if(r.status==="done")b='<button data-a="act" data-i="'+esc(r.id)+'">↺ إعادة فتح</button>';return '<div class="c"><h3><span>'+esc(r.name)+(r.priority==="عاجلة"&&r.status!=="done"?' <span class="pr">● عاجل</span>':'')+'</span><span class="bd '+r.status+'">'+(ST[r.status]||"غير محدد")+'</span></h3>'+'<div class="m"><span>'+esc(r.type)+' · '+esc(r.ptype)+'</span>'+(r.area?'<span>📍 '+esc(r.area)+'</span>':'')+(r.budget?'<span>💰 '+esc(r.budget)+'</span>':'')+(r.phone?'<span>📞 '+esc(r.phone)+'</span>':'')+(r.agent?'<span>👤 '+esc(r.agent)+'</span>':'')+'<span>🗓 '+fd(r.createdAt)+'</span></div>'+(r.notes?'<p class="n">'+esc(r.notes)+'</p>':'')+'<div class="ac">'+b+(admin?'<button data-a="edit" data-i="'+esc(r.id)+'">تعديل</button>':'')+(r.phone?'<a href="tel:'+esc(r.phone)+'"><button type="button">اتصال</button></a>':'')+(admin?'<button data-a="del" data-i="'+esc(r.id)+'">حذف</button>':'')+'</div></div>'}).join(""):'<div class="em">مفيش طلبات هنا</div>';
+}
+function openForm(r){editId=r?r.id:null;$("dt").textContent=r?"تعديل الطلب":"طلب جديد";var m={nm:"name",ph:"phone",ar:"area",bu:"budget",am:"agent",no:"notes"};Object.keys(m).forEach(function(k){$(k).value=r?(r[m[k]]||""):""});$("ty").value=r?r.type:"شراء";$("pt").value=r?r.ptype:"شقة";$("pr").value=r?r.priority:"عادية";$("dg").showModal()}
+async function enterApp(user){$("loginbox").style.display="none";$("app").style.display="block";message("sy","تم تسجيل الدخول: "+user.email);await load();if(channel)client.removeChannel(channel);channel=client.channel("requests-live").on("postgres_changes",{event:"*",schema:"public",table:"requests"},function(){load()}).subscribe();}
+async function showLogin(){ $("app").style.display="none";$("loginbox").style.display="block";if(channel){await client.removeChannel(channel);channel=null;} }
+$("login").onclick=async function(){var email=$("email").value.trim(),password=$("password").value;if(!email||!password){message("loginmsg","اكتب البريد الإلكتروني وكلمة المرور");return}message("loginmsg","جارٍ تسجيل الدخول...");var {data,error}=await client.auth.signInWithPassword({email:email,password:password});if(error){message("loginmsg","تعذر تسجيل الدخول: "+error.message);return}await enterApp(data.user)};
+$("logout").onclick=async function(){await client.auth.signOut();data=[];await showLogin();message("loginmsg","تم تسجيل الخروج")};
+$("add").onclick=function(){openForm(null)};$("cn").onclick=function(){$("dg").close()};
+$("fm").onsubmit=async function(e){e.preventDefault();var old=editId?data.find(function(x){return x.id===editId}):null;var o={name:$("nm").value.trim(),phone:$("ph").value.trim(),type:$("ty").value,ptype:$("pt").value,area:$("ar").value.trim(),budget:$("bu").value.trim(),agent:$("am").value.trim(),priority:$("pr").value,notes:$("no").value.trim(),status:old?old.status:"new",createdAt:old?old.createdAt:Date.now(),updatedAt:Date.now()};if(!o.name)return;await save(editId||("r"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),o)};
+$("tb").onclick=function(e){var t=e.target.getAttribute("data-t");if(t){tab=t;render()}};$("q").oninput=render;$("ag").onchange=render;
+$("ls").onclick=function(e){var b=e.target.closest("button[data-a]");if(!b)return;var a=b.getAttribute("data-a"),i=b.getAttribute("data-i");if(a==="edit")openForm(data.find(function(x){return x.id===i}));else if(a==="del")del(i);else setStatus(i,a)};
+client.auth.getSession().then(async function(res){if(res.data.session)await enterApp(res.data.session.user);else await showLogin()});
+client.auth.onAuthStateChange(async function(event,session){if(event==="SIGNED_OUT")await showLogin()});
+})();
+</script>
+</body>
+</html>

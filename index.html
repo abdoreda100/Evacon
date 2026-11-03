@@ -136,16 +136,24 @@ async function deleteProperty(id){if(!isAdmin()||!confirm("هل تريد حذف 
 async function loadLogs(){if(!isAdmin())return;let {data:rows,error}=await client.from('activity_logs').select('*').order('created_at',{ascending:false}).limit(300);if(error){$('logList').innerHTML='<div class="em">تعذر تحميل السجلات: '+esc(error.message)+'</div>';return}logs=rows||[];renderLogs()}
 function renderLogs(){let type=$('logType').value,q=$('logSearch').value.toLowerCase();let rows=logs.filter(x=>(!type||x.action===type)&&(!q||((x.user_email||'')+' '+JSON.stringify(x.details||{})).toLowerCase().includes(q)));$('logList').innerHTML=rows.length?rows.map(x=>`<div class="c"><h3>${esc(({login:'تسجيل دخول',logout:'تسجيل خروج',request_created:'إضافة طلب',request_updated:'تعديل طلب',request_deleted:'حذف طلب',request_completed:'إنهاء طلب'})[x.action]||x.action)}</h3><div class="m"><span>👤 ${esc(x.user_email||'مستخدم غير معروف')}</span><span>🕒 ${date(x.created_at)}</span></div><p class="n">${esc(JSON.stringify(x.details||{}))}</p></div>`).join(''):'<div class="em">لا توجد سجلات</div>'}
 async function setView(v){view=v;$("ls").style.display=v==="requests"?"":"none";$("st").style.display=v==="requests"?"":"none";$("tb").style.display=v==="requests"?"":"none";$("q").parentElement.style.display=v==="requests"?"":"none";$("properties").style.display=v==="properties"?"":"none";$("logs").style.display=v==="logs"?"":"none";$("showRequests").classList.toggle("on",v==="requests");$("showProperties").classList.toggle("on",v==="properties");$("showLogs").classList.toggle("on",v==="logs");if(v==="logs")await loadLogs();if(v==="properties")await loadProperties()}
-async function enterApp(user){currentUser=user;let {data:profile,error}=await client.from('profiles').select('role,full_name').eq('id',user.id).single();if(error||!profile){await client.auth.signOut();say('loginmsg','الحساب غير مضاف إلى profiles. اطلب من مدير النظام تعيين صلاحيتك.');return}role=profile.role;$('loginbox').style.display='none';$('app').style.display='block';$('q').placeholder=isAdmin()?'ابحث بالاسم أو الموبايل أو المنطقة…':'ابحث بالاسم أو المنطقة…';await load();await setView('requests')}
+async function enterApp(user){currentUser=user;let {data:profile,error}=await client.from('profiles').select('role,full_name').eq('id',user.id).single();if(error||!profile){await client.auth.signOut();say('loginmsg','الحساب غير مضاف إلى profiles. اطلب من مدير النظام تعيين صلاحيتك.');return}role = String(profile.role || "").trim().toLowerCase();$('loginbox').style.display='none';$('app').style.display='block';$('q').placeholder=isAdmin()?'ابحث بالاسم أو الموبايل أو المنطقة…':'ابحث بالاسم أو المنطقة…';await load();await setView('requests')}
 async function showLogin(){$('app').style.display='none';$('loginbox').style.display='block'}
 $('login').onclick=async()=>{let email=$('email').value.trim(),password=$('password').value;if(!email||!password){say('loginmsg','اكتب البريد الإلكتروني وكلمة المرور');return}say('loginmsg','جارٍ تسجيل الدخول...');let {data,error}=await client.auth.signInWithPassword({email,password});if(error){say('loginmsg','تعذر تسجيل الدخول: '+error.message);return}let {data:prof}=await client.from('profiles').select('role').eq('id',data.user.id).single();if(!prof||prof.role!==$('accountType').value){await client.auth.signOut();say('loginmsg','نوع الحساب المختار لا يطابق صلاحية هذا المستخدم.');return}await logEvent('login',{email});await enterApp(data.user)};
 $('logout').onclick=async()=>{await logEvent('logout',{});await client.auth.signOut();data=[];await showLogin();say('loginmsg','تم تسجيل الخروج')};
-$('add').onclick=()=>{
-  if(isAdmin()){
-    openForm(null);
-  }else{
-    alert("إضافة الطلبات متاحة للأدمن فقط.");
-  }
+$('add').addEventListener('click', function() {
+    if (role !== 'admin') {
+        alert('إضافة الطلبات متاحة للأدمن فقط');
+        return;
+    }
+
+    editId = null;
+
+    $('fm').reset();
+    $('dt').textContent = 'طلب جديد';
+    $('phoneField').style.display = '';
+    
+    $('dg').showModal();
+});
 };$('cn').onclick=()=>$('dg').close();$('feedbackCancel').onclick=()=>$('feedbackDialog').close();
 $('fm').onsubmit=async e=>{e.preventDefault();if(editId&&!isAdmin()){alert('ليس لديك صلاحية التعديل');return}let old=editId?data.find(x=>x.id===editId):null;let o={name:$('nm').value.trim(),phone:isAdmin()?$('ph').value.trim():null,type:$('ty').value,ptype:$('pt').value,area:$('ar').value.trim(),budget:$('bu').value.trim(),agent:$('am').value.trim(),priority:$('pr').value,notes:$('no').value.trim(),status:old?.status||'new',createdAt:old?.createdAt||Date.now(),updatedAt:Date.now(),feedback_reason:old?.feedback_reason||null,feedback_details:old?.feedback_details||null};if(!o.name)return;await save(editId||('r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),o)};
 $('feedbackForm').onsubmit=async e=>{e.preventDefault();if(!isAdmin()||!finishId)return;let reason=$('feedbackReason').value,details=$('feedbackDetails').value.trim();let {error}=await client.from('requests').update({status:'done',feedback_reason:reason,feedback_details:details,updated_at:Date.now()}).eq('id',finishId);if(error){alert('تعذر إنهاء الطلب: '+error.message);return}$('feedbackDialog').close();$('feedbackDetails').value='';finishId=null;await load()};

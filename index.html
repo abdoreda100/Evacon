@@ -97,70 +97,695 @@ label{font-size:12px;color:var(--mu);display:block}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 (function(){
+
 const SUPABASE_URL="https://fqktvstobrdvlsluskrq.supabase.co";
 const SUPABASE_KEY="sb_publishable_AuZ9JCANNGc-Bg1oKPHJ8Q__RUusPEz";
+
 const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const $=id=>document.getElementById(id), ST={new:"جديد",act:"نشط",done:"منتهي"};
-let data=[],logs=[],properties=[],tab="all",role="user",currentUser=null,editId=null,propertyEditId=null,channel=null,finishId=null,view="requests";
+
+const $=id=>document.getElementById(id);
+const ST={new:"جديد",act:"نشط",done:"منتهي"};
+
+let data=[],logs=[],properties=[],tab="all",role="user";
+let currentUser=null,editId=null,propertyEditId=null;
+let channel=null,finishId=null,view="requests";
+
 const isAdmin=()=>role==="admin";
-function esc(v){return String(v??"").replace(/[&<>\"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function say(id,t){$(id).textContent=t}
-function date(v){return v?new Date(v).toLocaleString("ar-EG"):"—"}
-function fromDb(x){return {...x,id:x.id,createdAt:Number(x.created_at)||Date.now(),updatedAt:Number(x.updated_at)||Date.now()}}
-function toDb(id,o){return {id,name:o.name,phone:o.phone,type:o.type,ptype:o.ptype,area:o.area,budget:o.budget,agent:o.agent,priority:o.priority,notes:o.notes,status:o.status,feedback_reason:o.feedback_reason||null,feedback_details:o.feedback_details||null,created_at:o.createdAt,updated_at:o.updatedAt}}
-async function logEvent(action,details={}){try{await client.rpc("log_user_activity",{p_action:action,p_details:details})}catch(e){console.warn("Activity log:",e.message)}}
-async function load(){say("sy","جارٍ تحميل الطلبات...");let {data:rows,error}=await client.rpc("get_requests_for_current_user");if(error){say("sy","تعذر تحميل الطلبات: "+error.message);return}data=(rows||[]).map(fromDb);render();say("sy","🟢 متصل بقاعدة بيانات Evacon")}
-async function save(id,o){say("sy","جارٍ الحفظ...");let {error}=await client.from("requests").upsert(toDb(id,o));if(error){alert("فشل الحفظ: "+error.message);return}$("dg").close();await load()}
-async function removeRequest(id){if(!confirm("حذف الطلب نهائيًا؟"))return;let {error}=await client.from("requests").delete().eq("id",id);if(error){alert("تعذر الحذف: "+error.message);return}await load()}
-function render(){
- $("add").style.display=isAdmin()?"":"none";$("addProperty").style.display=isAdmin()?"":"none";$("showLogs").style.display=isAdmin()?"":"none";$("roleLabel").textContent=(isAdmin()?"الأدمن":"مستخدم عادي")+" — "+(currentUser?.email||"");
- const counts={all:data.length,new:0,act:0,done:0};data.forEach(r=>{if(counts[r.status]!==undefined)counts[r.status]++});
- $("st").innerHTML=[["all","الكل"],["new","جديد"],["act","نشط"],["done","منتهي"]].map(a=>`<div class="s"><b>${counts[a[0]]}</b><span>${a[1]}</span></div>`).join("");
- $("tb").innerHTML=[["all","الكل"],["new","الجديدة"],["act","النشطة"],["done","المنتهية"]].map(a=>`<button data-t="${a[0]}" class="${tab===a[0]?"on":""}">${a[1]} (${counts[a[0]]})</button>`).join("");
- const agents=[...new Set(data.map(r=>r.agent).filter(Boolean))],cur=$("ag").value;$("ag").innerHTML='<option value="">كل الموظفين</option>'+agents.map(a=>`<option ${a===cur?'selected':''}>${esc(a)}</option>`).join("");
- const q=$("q").value.trim().toLowerCase(),ag=$("ag").value;
- const list=data.filter(r=>(tab==="all"||r.status===tab)&&(!ag||r.agent===ag)&&(!q||(r.name+" "+r.phone+" "+r.area).toLowerCase().includes(q))).sort((a,b)=>(b.priority==="عاجلة"&&b.status!=="done")-(a.priority==="عاجلة"&&a.status!=="done")||(b.createdAt-a.createdAt));
- $("ls").innerHTML=list.length?list.map(r=>{let actions="";if(isAdmin()){if(r.status!=="done")actions+=`<button data-a="finish" data-i="${esc(r.id)}">✔ إنهاء الطلب</button>`;else actions+=`<button data-a="reopen" data-i="${esc(r.id)}">↺ إعادة فتح</button>`;actions+=`<button data-a="edit" data-i="${esc(r.id)}">تعديل</button><button data-a="del" data-i="${esc(r.id)}">حذف</button>`}return `<div class="c"><h3><span>${esc(r.name)} ${r.priority==="عاجلة"&&r.status!=="done"?'<span class="pr">● عاجل</span>':''}</span><span class="bd ${esc(r.status)}">${ST[r.status]||"غير محدد"}</span></h3><div class="m"><span>${esc(r.type)} · ${esc(r.ptype)}</span>${r.area?`<span>📍 ${esc(r.area)}</span>`:""}${r.budget?`<span>💰 ${esc(r.budget)}</span>`:""}${isAdmin()&&r.phone?`<span>📞 ${esc(r.phone)}</span>`:""}${r.agent?`<span>👤 ${esc(r.agent)}</span>`:""}<span>🗓 ${date(r.createdAt)}</span></div>${r.notes?`<p class="n">${esc(r.notes)}</p>`:""}${r.status==="done"&&r.feedback_reason?`<p class="n"><b>سبب الإنهاء:</b> ${esc(r.feedback_reason)} ${esc(r.feedback_details||"")}</p>`:""}<div class="ac">${actions}${isAdmin()&&r.phone?`<a href="tel:${esc(r.phone)}"><button type="button">اتصال</button></a>`:""}</div></div>`}).join(""):'<div class="em">مفيش طلبات هنا</div>';
+
+function esc(v){
+    return String(v??"").replace(/[&<>"]/g,c=>({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"
+    }[c]));
 }
-async function save(id,o){
-  if(!isAdmin()){
-    alert("غير مسموح لك بإضافة أو تعديل الطلبات.");
-    return;
-  }editId=r?.id||null;$('dt').textContent=r?'تعديل الطلب':'طلب جديد';$('phoneField').style.display=isAdmin()?'':'none';const fields={nm:'name',ph:'phone',ar:'area',bu:'budget',am:'agent',no:'notes'};Object.keys(fields).forEach(k=>$(k).value=r?.[fields[k]]||'');$('ty').value=r?.type||'شراء';$('pt').value=r?.ptype||'شقة';$('pr').value=r?.priority||'عادية';$('dg').showModal()}
-function propertyFromDb(x){return {...x,size_m2:Number(x.size_m2)||0,price:Number(x.price)||0}}
-async function loadProperties(){let {data:rows,error}=await client.rpc("get_properties_for_current_user");if(error){$("propertyList").innerHTML='<div class="em">تعذر تحميل مخزون الشقق: '+esc(error.message)+'</div>';return}properties=(rows||[]).map(propertyFromDb);renderProperties()}
-function renderProperties(){const q=$("pq").value.trim().toLowerCase(),st=$("pstatus").value;const rows=properties.filter(x=>(!st||x.status===st)&&(!q||[x.code,x.project,x.area,x.property_type,x.source_type].join(" ").toLowerCase().includes(q))).sort((a,b)=>(b.updated_at||0)-(a.updated_at||0));$("addProperty").style.display=isAdmin()?"":"none";$("propertyList").innerHTML=rows.length?rows.map(x=>`<div class="c"><h3><span>${esc(x.project)} ${x.code?`<small>(${esc(x.code)})</small>`:""}</span><span class="bd ${x.status==="متاحة"?"act":x.status==="مباعة"?"done":"new"}">${esc(x.status)}</span></h3><div class="m"><span>📍 ${esc(x.area)}</span><span>🏠 ${esc(x.property_type)}</span><span>📐 ${esc(x.size_m2)} م²</span><span>💰 ${Number(x.price).toLocaleString("ar-EG")} جنيه</span><span>💵 ${x.size_m2?Math.round(x.price/x.size_m2).toLocaleString("ar-EG"):"—"} جنيه/م²</span><span>🤝 ${esc(x.source_type)}</span>${x.floor?`<span>الدور: ${esc(x.floor)}</span>`:""}${x.bedrooms?`<span>🛏 ${esc(x.bedrooms)} غرف</span>`:""}${x.bathrooms?`<span>🚿 ${esc(x.bathrooms)} حمامات</span>`:""}${isAdmin()&&x.contact_name?`<span>👤 ${esc(x.contact_name)}</span>`:""}${isAdmin()&&x.contact_phone?`<span>📞 ${esc(x.contact_phone)}</span>`:""}</div>${x.notes?`<p class="n">${esc(x.notes)}</p>`:""}${isAdmin()?`<div class="ac"><button data-pa="edit" data-pid="${esc(x.id)}">تعديل</button><button data-pa="delete" data-pid="${esc(x.id)}">حذف</button></div>`:""}</div>`).join(""):'<div class="em">لا توجد وحدات مسجلة</div>'}
-function openPropertyForm(x){propertyEditId=x?.id||null;$("propertyTitle").textContent=x?"تعديل بيانات الشقة":"إضافة شقة جديدة";const fields={pcode:"code",pproject:"project",parea:"area",psize:"size_m2",pprice:"price",pfloor:"floor",pbedrooms:"bedrooms",pbathrooms:"bathrooms",pcontact:"contact_name",pcontactphone:"contact_phone",pnotes:"notes"};Object.keys(fields).forEach(k=>$(k).value=x?.[fields[k]]??"");$("ptype").value=x?.property_type||"شقة";$("psource").value=x?.source_type||"مالك";$("pstate").value=x?.status||"متاحة";$("propertyDialog").showModal()}
-async function saveProperty(){if(!isAdmin())return alert("غير مسموح لك بإضافة أو تعديل الوحدات");const size=Number($("psize").value),price=Number($("pprice").value);if(!$("pproject").value.trim()||!$("parea").value.trim()||!(size>0)||!(price>0)){alert("اكتب المشروع والمنطقة ومساحة وسعر صحيحين");return}const payload={id:propertyEditId||("p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),code:$("pcode").value.trim()||null,project:$("pproject").value.trim(),area:$("parea").value.trim(),property_type:$("ptype").value,size_m2:size,price:price,floor:$("pfloor").value.trim()||null,bedrooms:Number($("pbedrooms").value)||null,bathrooms:Number($("pbathrooms").value)||null,source_type:$("psource").value,contact_name:$("pcontact").value.trim()||null,contact_phone:$("pcontactphone").value.trim()||null,status:$("pstate").value,notes:$("pnotes").value.trim()||null,updated_at:Date.now()};if(!propertyEditId)payload.created_at=Date.now();let {error}=await client.from("properties").upsert(payload);if(error){alert("تعذر حفظ الوحدة: "+error.message);return}$("propertyDialog").close();await loadProperties()}
-async function deleteProperty(id){if(!isAdmin()||!confirm("هل تريد حذف الوحدة نهائيًا؟"))return;let {error}=await client.from("properties").delete().eq("id",id);if(error){alert("تعذر حذف الوحدة: "+error.message);return}await loadProperties()}
-async function loadLogs(){if(!isAdmin())return;let {data:rows,error}=await client.from('activity_logs').select('*').order('created_at',{ascending:false}).limit(300);if(error){$('logList').innerHTML='<div class="em">تعذر تحميل السجلات: '+esc(error.message)+'</div>';return}logs=rows||[];renderLogs()}
-function renderLogs(){let type=$('logType').value,q=$('logSearch').value.toLowerCase();let rows=logs.filter(x=>(!type||x.action===type)&&(!q||((x.user_email||'')+' '+JSON.stringify(x.details||{})).toLowerCase().includes(q)));$('logList').innerHTML=rows.length?rows.map(x=>`<div class="c"><h3>${esc(({login:'تسجيل دخول',logout:'تسجيل خروج',request_created:'إضافة طلب',request_updated:'تعديل طلب',request_deleted:'حذف طلب',request_completed:'إنهاء طلب'})[x.action]||x.action)}</h3><div class="m"><span>👤 ${esc(x.user_email||'مستخدم غير معروف')}</span><span>🕒 ${date(x.created_at)}</span></div><p class="n">${esc(JSON.stringify(x.details||{}))}</p></div>`).join(''):'<div class="em">لا توجد سجلات</div>'}
-async function setView(v){view=v;$("ls").style.display=v==="requests"?"":"none";$("st").style.display=v==="requests"?"":"none";$("tb").style.display=v==="requests"?"":"none";$("q").parentElement.style.display=v==="requests"?"":"none";$("properties").style.display=v==="properties"?"":"none";$("logs").style.display=v==="logs"?"":"none";$("showRequests").classList.toggle("on",v==="requests");$("showProperties").classList.toggle("on",v==="properties");$("showLogs").classList.toggle("on",v==="logs");if(v==="logs")await loadLogs();if(v==="properties")await loadProperties()}
-async function enterApp(user){currentUser=user;let {data:profile,error}=await client.from('profiles').select('role,full_name').eq('id',user.id).single();if(error||!profile){await client.auth.signOut();say('loginmsg','الحساب غير مضاف إلى profiles. اطلب من مدير النظام تعيين صلاحيتك.');return}role = String(profile.role || "").trim().toLowerCase();$('loginbox').style.display='none';$('app').style.display='block';$('q').placeholder=isAdmin()?'ابحث بالاسم أو الموبايل أو المنطقة…':'ابحث بالاسم أو المنطقة…';await load();await setView('requests')}
-async function showLogin(){$('app').style.display='none';$('loginbox').style.display='block'}
-$('login').onclick=async()=>{let email=$('email').value.trim(),password=$('password').value;if(!email||!password){say('loginmsg','اكتب البريد الإلكتروني وكلمة المرور');return}say('loginmsg','جارٍ تسجيل الدخول...');let {data,error}=await client.auth.signInWithPassword({email,password});if(error){say('loginmsg','تعذر تسجيل الدخول: '+error.message);return}let {data:prof}=await client.from('profiles').select('role').eq('id',data.user.id).single();if(!prof||prof.role!==$('accountType').value){await client.auth.signOut();say('loginmsg','نوع الحساب المختار لا يطابق صلاحية هذا المستخدم.');return}await logEvent('login',{email});await enterApp(data.user)};
-$('logout').onclick=async()=>{await logEvent('logout',{});await client.auth.signOut();data=[];await showLogin();say('loginmsg','تم تسجيل الخروج')};
-$('add').addEventListener('click', function() {
-    if (role !== 'admin') {
-        alert('إضافة الطلبات متاحة للأدمن فقط');
+
+function say(id,t){
+    $(id).textContent=t;
+}
+
+function date(v){
+    return v?new Date(v).toLocaleString("ar-EG"):"—";
+}
+
+function fromDb(x){
+    return {...x,id:x.id,createdAt:Number(x.created_at)||Date.now(),updatedAt:Number(x.updated_at)||Date.now()};
+}
+
+function toDb(id,o){
+    return {
+        id,name:o.name,phone:o.phone,type:o.type,
+        ptype:o.ptype,area:o.area,budget:o.budget,
+        agent:o.agent,priority:o.priority,notes:o.notes,
+        status:o.status,
+        feedback_reason:o.feedback_reason||null,
+        feedback_details:o.feedback_details||null,
+        created_at:o.createdAt,updated_at:o.updatedAt
+    };
+}
+
+async function logEvent(action,details={}){
+    try{
+        await client.rpc("log_user_activity",{
+            p_action:action,
+            p_details:details
+        });
+    }catch(e){
+        console.warn("Activity log:",e.message);
+    }
+}
+
+async function load(){
+    say("sy","جارٍ تحميل الطلبات...");
+
+    let {data:rows,error}=await client.rpc("get_requests_for_current_user");
+
+    if(error){
+        say("sy","تعذر تحميل الطلبات: "+error.message);
         return;
     }
 
-    editId = null;
+    data=(rows||[]).map(fromDb);
+    render();
+    say("sy","🟢 متصل بقاعدة بيانات Evacon");
+}
 
-    $('fm').reset();
-    $('dt').textContent = 'طلب جديد';
-    $('phoneField').style.display = '';
-    
-    $('dg').showModal();
+// حفظ الطلب - الأدمن فقط
+async function save(id,o){
+
+    if(!isAdmin()){
+        alert("غير مسموح لك بإضافة أو تعديل الطلبات");
+        return;
+    }
+
+    say("sy","جارٍ الحفظ...");
+
+    let {error}=await client.from("requests").upsert(toDb(id,o));
+
+    if(error){
+        alert("فشل الحفظ: "+error.message);
+        return;
+    }
+
+    $("dg").close();
+    await load();
+}
+
+// فتح نموذج الطلب - الأدمن فقط
+function openForm(r){
+
+    if(!isAdmin()){
+        alert("إضافة الطلبات متاحة للأدمن فقط");
+        return;
+    }
+
+    editId=r?.id||null;
+
+    $("dt").textContent=r?"تعديل الطلب":"طلب جديد";
+
+    $("fm").reset();
+
+    $("phoneField").style.display="";
+
+    const fields={
+        nm:"name",
+        ph:"phone",
+        ar:"area",
+        bu:"budget",
+        am:"agent",
+        no:"notes"
+    };
+
+    Object.keys(fields).forEach(k=>{
+        $(k).value=r?.[fields[k]]||"";
+    });
+
+    $("ty").value=r?.type||"شراء";
+    $("pt").value=r?.ptype||"شقة";
+    $("pr").value=r?.priority||"عادية";
+
+    $("dg").showModal();
+}
+
+async function removeRequest(id){
+
+    if(!isAdmin())return;
+
+    if(!confirm("حذف الطلب نهائيًا؟"))return;
+
+    let {error}=await client.from("requests").delete().eq("id",id);
+
+    if(error){
+        alert("تعذر الحذف: "+error.message);
+        return;
+    }
+
+    await load();
+}
+
+function render(){
+
+    $("add").style.display=isAdmin()?"":"none";
+    $("addProperty").style.display=isAdmin()?"":"none";
+    $("showLogs").style.display=isAdmin()?"":"none";
+
+    $("roleLabel").textContent=
+        (isAdmin()?"الأدمن":"مستخدم عادي")+" — "+(currentUser?.email||"");
+
+    const counts={all:data.length,new:0,act:0,done:0};
+
+    data.forEach(r=>{
+        if(counts[r.status]!==undefined)counts[r.status]++;
+    });
+
+    $("st").innerHTML=[
+        ["all","الكل"],
+        ["new","جديد"],
+        ["act","نشط"],
+        ["done","منتهي"]
+    ].map(a=>`
+        <div class="s">
+            <b>${counts[a[0]]}</b>
+            <span>${a[1]}</span>
+        </div>
+    `).join("");
+
+    $("tb").innerHTML=[
+        ["all","الكل"],
+        ["new","الجديدة"],
+        ["act","النشطة"],
+        ["done","المنتهية"]
+    ].map(a=>`
+        <button data-t="${a[0]}" class="${tab===a[0]?"on":""}">
+            ${a[1]} (${counts[a[0]]})
+        </button>
+    `).join("");
+
+    const agents=[...new Set(data.map(r=>r.agent).filter(Boolean))];
+    const cur=$("ag").value;
+
+    $("ag").innerHTML=
+        '<option value="">كل الموظفين</option>'+
+        agents.map(a=>`<option ${a===cur?'selected':''}>${esc(a)}</option>`).join("");
+
+    const q=$("q").value.trim().toLowerCase();
+    const ag=$("ag").value;
+
+    const list=data.filter(r=>
+        (tab==="all"||r.status===tab)&&
+        (!ag||r.agent===ag)&&
+        (!q||(r.name+" "+r.phone+" "+r.area).toLowerCase().includes(q))
+    ).sort((a,b)=>
+        (b.priority==="عاجلة"&&b.status!=="done")-
+        (a.priority==="عاجلة"&&a.status!=="done")||
+        (b.createdAt-a.createdAt)
+    );
+
+    $("ls").innerHTML=list.length?list.map(r=>{
+
+        let actions="";
+
+        if(isAdmin()){
+
+            if(r.status!=="done")
+                actions+=`<button data-a="finish" data-i="${esc(r.id)}">✔ إنهاء الطلب</button>`;
+            else
+                actions+=`<button data-a="reopen" data-i="${esc(r.id)}">↺ إعادة فتح</button>`;
+
+            actions+=`
+                <button data-a="edit" data-i="${esc(r.id)}">تعديل</button>
+                <button data-a="del" data-i="${esc(r.id)}">حذف</button>
+            `;
+        }
+
+        return `
+        <div class="c">
+            <h3>
+                <span>${esc(r.name)}</span>
+                <span class="bd ${esc(r.status)}">${ST[r.status]||"غير محدد"}</span>
+            </h3>
+
+            <div class="m">
+                <span>${esc(r.type)} · ${esc(r.ptype)}</span>
+                ${r.area?`<span>📍 ${esc(r.area)}</span>`:""}
+                ${r.budget?`<span>💰 ${esc(r.budget)}</span>`:""}
+                ${isAdmin()&&r.phone?`<span>📞 ${esc(r.phone)}</span>`:""}
+                ${r.agent?`<span>👤 ${esc(r.agent)}</span>`:""}
+                <span>🗓 ${date(r.createdAt)}</span>
+            </div>
+
+            ${r.notes?`<p class="n">${esc(r.notes)}</p>`:""}
+
+            <div class="ac">
+                ${actions}
+                ${isAdmin()&&r.phone?`<a href="tel:${esc(r.phone)}"><button type="button">اتصال</button></a>`:""}
+            </div>
+        </div>
+        `;
+    }).join(""):'<div class="em">مفيش طلبات هنا</div>';
+}
+
+function propertyFromDb(x){
+    return {...x,size_m2:Number(x.size_m2)||0,price:Number(x.price)||0};
+}
+
+async function loadProperties(){
+
+    let {data:rows,error}=await client.rpc("get_properties_for_current_user");
+
+    if(error){
+        $("propertyList").innerHTML='<div class="em">تعذر تحميل مخزون الشقق</div>';
+        return;
+    }
+
+    properties=(rows||[]).map(propertyFromDb);
+    renderProperties();
+}
+
+function renderProperties(){
+
+    const q=$("pq").value.trim().toLowerCase();
+    const st=$("pstatus").value;
+
+    const rows=properties.filter(x=>
+        (!st||x.status===st)&&
+        (!q||[x.code,x.project,x.area,x.property_type,x.source_type].join(" ").toLowerCase().includes(q))
+    );
+
+    $("addProperty").style.display=isAdmin()?"":"none";
+
+    $("propertyList").innerHTML=rows.length?rows.map(x=>`
+        <div class="c">
+            <h3>${esc(x.project)}</h3>
+            <div class="m">
+                <span>📍 ${esc(x.area)}</span>
+                <span>🏠 ${esc(x.property_type)}</span>
+                <span>📐 ${esc(x.size_m2)} م²</span>
+                <span>💰 ${Number(x.price).toLocaleString("ar-EG")} جنيه</span>
+            </div>
+            ${isAdmin()?`
+                <div class="ac">
+                    <button data-pa="edit" data-pid="${esc(x.id)}">تعديل</button>
+                    <button data-pa="delete" data-pid="${esc(x.id)}">حذف</button>
+                </div>
+            `:""}
+        </div>
+    `).join(""):'<div class="em">لا توجد وحدات مسجلة</div>';
+}
+
+function openPropertyForm(x){
+
+    if(!isAdmin())return;
+
+    propertyEditId=x?.id||null;
+
+    $("propertyTitle").textContent=x?"تعديل بيانات الشقة":"إضافة شقة جديدة";
+
+    const fields={
+        pcode:"code",pproject:"project",parea:"area",
+        psize:"size_m2",pprice:"price",pfloor:"floor",
+        pbedrooms:"bedrooms",pbathrooms:"bathrooms",
+        pcontact:"contact_name",pcontactphone:"contact_phone",
+        pnotes:"notes"
+    };
+
+    Object.keys(fields).forEach(k=>{
+        $(k).value=x?.[fields[k]]??"";
+    });
+
+    $("ptype").value=x?.property_type||"شقة";
+    $("psource").value=x?.source_type||"مالك";
+    $("pstate").value=x?.status||"متاحة";
+
+    $("propertyDialog").showModal();
+}
+
+async function saveProperty(){
+
+    if(!isAdmin())return alert("غير مسموح لك بإضافة أو تعديل الوحدات");
+
+    const size=Number($("psize").value);
+    const price=Number($("pprice").value);
+
+    if(!$("pproject").value.trim()||!$("parea").value.trim()||!(size>0)||!(price>0)){
+        alert("اكتب المشروع والمنطقة ومساحة وسعر صحيحين");
+        return;
+    }
+
+    const payload={
+        id:propertyEditId||("p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+        code:$("pcode").value.trim()||null,
+        project:$("pproject").value.trim(),
+        area:$("parea").value.trim(),
+        property_type:$("ptype").value,
+        size_m2:size,
+        price:price,
+        floor:$("pfloor").value.trim()||null,
+        bedrooms:Number($("pbedrooms").value)||null,
+        bathrooms:Number($("pbathrooms").value)||null,
+        source_type:$("psource").value,
+        contact_name:$("pcontact").value.trim()||null,
+        contact_phone:$("pcontactphone").value.trim()||null,
+        status:$("pstate").value,
+        notes:$("pnotes").value.trim()||null,
+        updated_at:Date.now()
+    };
+
+    if(!propertyEditId)payload.created_at=Date.now();
+
+    let {error}=await client.from("properties").upsert(payload);
+
+    if(error){
+        alert("تعذر حفظ الوحدة: "+error.message);
+        return;
+    }
+
+    $("propertyDialog").close();
+    await loadProperties();
+}
+
+async function deleteProperty(id){
+
+    if(!isAdmin()||!confirm("هل تريد حذف الوحدة نهائيًا؟"))return;
+
+    let {error}=await client.from("properties").delete().eq("id",id);
+
+    if(error){
+        alert("تعذر حذف الوحدة: "+error.message);
+        return;
+    }
+
+    await loadProperties();
+}
+
+async function loadLogs(){
+
+    if(!isAdmin())return;
+
+    let {data:rows,error}=await client.from("activity_logs")
+        .select("*").order("created_at",{ascending:false}).limit(300);
+
+    if(error){
+        $("logList").innerHTML='<div class="em">تعذر تحميل السجلات</div>';
+        return;
+    }
+
+    logs=rows||[];
+    renderLogs();
+}
+
+function renderLogs(){
+
+    let type=$("logType").value;
+    let q=$("logSearch").value.toLowerCase();
+
+    let rows=logs.filter(x=>
+        (!type||x.action===type)&&
+        (!q||((x.user_email||"")+" "+JSON.stringify(x.details||{})).toLowerCase().includes(q))
+    );
+
+    $("logList").innerHTML=rows.length?rows.map(x=>`
+        <div class="c">
+            <h3>${esc(x.action)}</h3>
+            <div class="m">
+                <span>👤 ${esc(x.user_email||"مستخدم غير معروف")}</span>
+                <span>🕒 ${date(x.created_at)}</span>
+            </div>
+        </div>
+    `).join(""):'<div class="em">لا توجد سجلات</div>';
+}
+
+async function setView(v){
+
+    view=v;
+
+    $("ls").style.display=v==="requests"?"":"none";
+    $("st").style.display=v==="requests"?"":"none";
+    $("tb").style.display=v==="requests"?"":"none";
+    $("q").parentElement.style.display=v==="requests"?"":"none";
+    $("properties").style.display=v==="properties"?"":"none";
+    $("logs").style.display=v==="logs"?"":"none";
+
+    $("showRequests").classList.toggle("on",v==="requests");
+    $("showProperties").classList.toggle("on",v==="properties");
+    $("showLogs").classList.toggle("on",v==="logs");
+
+    if(v==="logs")await loadLogs();
+    if(v==="properties")await loadProperties();
+}
+
+async function enterApp(user){
+
+    currentUser=user;
+
+    let {data:profile,error}=await client.from("profiles")
+        .select("role,full_name").eq("id",user.id).single();
+
+    if(error||!profile){
+        await client.auth.signOut();
+        say("loginmsg","الحساب غير مضاف إلى profiles.");
+        return;
+    }
+
+    role=String(profile.role||"").trim().toLowerCase();
+
+    $("loginbox").style.display="none";
+    $("app").style.display="block";
+
+    $("q").placeholder=isAdmin()?
+        "ابحث بالاسم أو الموبايل أو المنطقة…":
+        "ابحث بالاسم أو المنطقة…";
+
+    await load();
+    await setView("requests");
+}
+
+async function showLogin(){
+
+    $("app").style.display="none";
+    $("loginbox").style.display="block";
+}
+
+// تسجيل الدخول
+$("login").onclick=async()=>{
+
+    let email=$("email").value.trim();
+    let password=$("password").value;
+
+    if(!email||!password){
+        say("loginmsg","اكتب البريد الإلكتروني وكلمة المرور");
+        return;
+    }
+
+    say("loginmsg","جارٍ تسجيل الدخول...");
+
+    let {data,error}=await client.auth.signInWithPassword({email,password});
+
+    if(error){
+        say("loginmsg","تعذر تسجيل الدخول: "+error.message);
+        return;
+    }
+
+    let {data:prof}=await client.from("profiles")
+        .select("role").eq("id",data.user.id).single();
+
+    if(!prof||String(prof.role).trim().toLowerCase()!==$("accountType").value){
+        await client.auth.signOut();
+        say("loginmsg","نوع الحساب المختار لا يطابق صلاحية هذا المستخدم.");
+        return;
+    }
+
+    await logEvent("login",{email});
+    await enterApp(data.user);
+};
+
+// تسجيل الخروج
+$("logout").onclick=async()=>{
+
+    await logEvent("logout",{});
+    await client.auth.signOut();
+
+    data=[];
+    await showLogin();
+
+    say("loginmsg","تم تسجيل الخروج");
+};
+
+// زر إضافة الطلب - الأدمن فقط
+$("add").onclick=function(e){
+
+    e.preventDefault();
+
+    if(!isAdmin()){
+        alert("إضافة الطلبات متاحة للأدمن فقط");
+        return;
+    }
+
+    openForm(null);
+};
+
+// إلغاء النموذج
+$("cn").onclick=()=>$("dg").close();
+$("feedbackCancel").onclick=()=>$("feedbackDialog").close();
+
+// حفظ الطلب
+$("fm").onsubmit=async e=>{
+
+    e.preventDefault();
+
+    if(!isAdmin()){
+        alert("غير مسموح لك بإضافة الطلبات");
+        return;
+    }
+
+    let old=editId?data.find(x=>x.id===editId):null;
+
+    let o={
+        name:$("nm").value.trim(),
+        phone:$("ph").value.trim(),
+        type:$("ty").value,
+        ptype:$("pt").value,
+        area:$("ar").value.trim(),
+        budget:$("bu").value.trim(),
+        agent:$("am").value.trim(),
+        priority:$("pr").value,
+        notes:$("no").value.trim(),
+        status:old?.status||"new",
+        createdAt:old?.createdAt||Date.now(),
+        updatedAt:Date.now(),
+        feedback_reason:old?.feedback_reason||null,
+        feedback_details:old?.feedback_details||null
+    };
+
+    if(!o.name)return;
+
+    await save(
+        editId||("r"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
+        o
+    );
+};
+
+// إنهاء الطلب
+$("feedbackForm").onsubmit=async e=>{
+
+    e.preventDefault();
+
+    if(!isAdmin()||!finishId)return;
+
+    let reason=$("feedbackReason").value;
+    let details=$("feedbackDetails").value.trim();
+
+    let {error}=await client.from("requests").update({
+        status:"done",
+        feedback_reason:reason,
+        feedback_details:details,
+        updated_at:Date.now()
+    }).eq("id",finishId);
+
+    if(error){
+        alert("تعذر إنهاء الطلب: "+error.message);
+        return;
+    }
+
+    $("feedbackDialog").close();
+    $("feedbackDetails").value="";
+    finishId=null;
+
+    await load();
+};
+
+// الفلاتر
+$("tb").onclick=e=>{
+    let t=e.target.getAttribute("data-t");
+    if(t){
+        tab=t;
+        render();
+    }
+};
+
+$("q").oninput=render;
+$("ag").onchange=render;
+
+// أزرار الطلبات
+$("ls").onclick=e=>{
+
+    let b=e.target.closest("button[data-a]");
+
+    if(!b||!isAdmin())return;
+
+    let a=b.dataset.a;
+    let id=b.dataset.i;
+
+    if(a==="edit")openForm(data.find(x=>x.id===id));
+
+    if(a==="del")removeRequest(id);
+
+    if(a==="finish"){
+        finishId=id;
+        $("feedbackDialog").showModal();
+    }
+
+    if(a==="reopen"){
+        client.from("requests").update({
+            status:"act",
+            feedback_reason:null,
+            feedback_details:null,
+            updated_at:Date.now()
+        }).eq("id",id).then(({error})=>
+            error?alert(error.message):load()
+        );
+    }
+};
+
+// التنقل بين الأقسام
+$("showRequests").onclick=()=>setView("requests");
+$("showProperties").onclick=()=>setView("properties");
+$("showLogs").onclick=()=>isAdmin()&&setView("logs");
+
+// مخزون الشقق
+$("addProperty").onclick=()=>isAdmin()&&openPropertyForm(null);
+$("propertyCancel").onclick=()=>$("propertyDialog").close();
+
+$("propertyForm").onsubmit=async e=>{
+    e.preventDefault();
+    await saveProperty();
+};
+
+$("pq").oninput=renderProperties;
+$("pstatus").onchange=renderProperties;
+
+$("propertyList").onclick=e=>{
+
+    let b=e.target.closest("button[data-pa]");
+
+    if(!b||!isAdmin())return;
+
+    let x=properties.find(p=>p.id===b.dataset.pid);
+
+    if(b.dataset.pa==="edit")openPropertyForm(x);
+
+    if(b.dataset.pa==="delete")deleteProperty(b.dataset.pid);
+};
+
+// سجل النشاط
+$("logType").onchange=renderLogs;
+$("logSearch").oninput=renderLogs;
+
+// استعادة الجلسة
+client.auth.getSession().then(async r=>{
+
+    if(r.data.session)
+        await enterApp(r.data.session.user);
+    else
+        await showLogin();
+
 });
-};$('cn').onclick=()=>$('dg').close();$('feedbackCancel').onclick=()=>$('feedbackDialog').close();
-$('fm').onsubmit=async e=>{e.preventDefault();if(editId&&!isAdmin()){alert('ليس لديك صلاحية التعديل');return}let old=editId?data.find(x=>x.id===editId):null;let o={name:$('nm').value.trim(),phone:isAdmin()?$('ph').value.trim():null,type:$('ty').value,ptype:$('pt').value,area:$('ar').value.trim(),budget:$('bu').value.trim(),agent:$('am').value.trim(),priority:$('pr').value,notes:$('no').value.trim(),status:old?.status||'new',createdAt:old?.createdAt||Date.now(),updatedAt:Date.now(),feedback_reason:old?.feedback_reason||null,feedback_details:old?.feedback_details||null};if(!o.name)return;await save(editId||('r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),o)};
-$('feedbackForm').onsubmit=async e=>{e.preventDefault();if(!isAdmin()||!finishId)return;let reason=$('feedbackReason').value,details=$('feedbackDetails').value.trim();let {error}=await client.from('requests').update({status:'done',feedback_reason:reason,feedback_details:details,updated_at:Date.now()}).eq('id',finishId);if(error){alert('تعذر إنهاء الطلب: '+error.message);return}$('feedbackDialog').close();$('feedbackDetails').value='';finishId=null;await load()};
-$('tb').onclick=e=>{let t=e.target.getAttribute('data-t');if(t){tab=t;render()}};$('q').oninput=render;$('ag').onchange=render;
-$('ls').onclick=e=>{let b=e.target.closest('button[data-a]');if(!b)return;let a=b.dataset.a,id=b.dataset.i;if(!isAdmin())return;if(a==='edit')openForm(data.find(x=>x.id===id));if(a==='del')removeRequest(id);if(a==='finish'){finishId=id;$('feedbackDialog').showModal()}if(a==='reopen'){client.from('requests').update({status:'act',feedback_reason:null,feedback_details:null,updated_at:Date.now()}).eq('id',id).then(({error})=>error?alert(error.message):load())}};
-$("showRequests").onclick=()=>setView("requests");$("showProperties").onclick=()=>setView("properties");$("showLogs").onclick=()=>isAdmin()&&setView("logs");$("addProperty").onclick=()=>isAdmin()&&openPropertyForm(null);$("propertyCancel").onclick=()=>$("propertyDialog").close();$("propertyForm").onsubmit=async e=>{e.preventDefault();await saveProperty()};$("pq").oninput=renderProperties;$("pstatus").onchange=renderProperties;$("propertyList").onclick=e=>{let b=e.target.closest("button[data-pa]");if(!b||!isAdmin())return;let x=properties.find(p=>p.id===b.dataset.pid);if(b.dataset.pa==="edit")openPropertyForm(x);if(b.dataset.pa==="delete")deleteProperty(b.dataset.pid)};$('logType').onchange=renderLogs;$('logSearch').oninput=renderLogs;
-client.auth.getSession().then(async r=>{if(r.data.session)await enterApp(r.data.session.user);else await showLogin()});client.auth.onAuthStateChange(async(event,session)=>{if(event==='SIGNED_OUT')await showLogin()});
+
+client.auth.onAuthStateChange(async(event,session)=>{
+
+    if(event==="SIGNED_OUT")
+        await showLogin();
+
+});
+
 })();
 </script>
 </body>

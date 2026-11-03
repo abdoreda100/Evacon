@@ -1,792 +1,665 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>إدارة الطلبات العقارية</title>
-<style>
-:root{--bg:#f6f7f9;--card:#fff;--tx:#1b2430;--mu:#6b7684;--bd:#e3e7ec;--ac:#0f6e56;--acb:#e1f5ee;--new:#2563eb;--newb:#e6efff;--done:#6b7684;--doneb:#eceff2;--dg:#c0392b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181d;--card:#1e242b;--tx:#e8ecf0;--mu:#9aa5b1;--bd:#2f3740;--ac:#3ecf9e;--acb:#173d31;--new:#7aa7ff;--newb:#1c2d4d;--done:#9aa5b1;--doneb:#2a3139;--dg:#ff7a6b}}
-:root[data-theme="dark"]{--bg:#14181d;--card:#1e242b;--tx:#e8ecf0;--mu:#9aa5b1;--bd:#2f3740;--ac:#3ecf9e;--acb:#173d31;--new:#7aa7ff;--newb:#1c2d4d;--done:#9aa5b1;--doneb:#2a3139;--dg:#ff7a6b}
-*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6}
-.w{max-width:960px;margin:0 auto;padding:16px}
-header{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
-h1{font-size:20px;margin:0}
-button{font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 12px}
-button.p{background:var(--ac);color:#fff;border-color:var(--ac)}
-.st{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.s{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;text-align:center}
-.s b{display:block;font-size:22px}.s span{font-size:12px;color:var(--mu)}
-.tb{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
-.tb button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-input,select,textarea{font:inherit;width:100%;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx)}
-.f{display:flex;gap:8px;margin-bottom:12px}.f input{flex:2}.f select{flex:1}
-.c{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:10px}
-.c h3{margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;gap:8px;align-items:center}
-.m{color:var(--mu);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 14px}
-.n{margin:6px 0 0;font-size:14px}
-.bd{font-size:12px;padding:2px 10px;border-radius:99px;white-space:nowrap}
-.bd.new{background:var(--newb);color:var(--new)}.bd.act{background:var(--acb);color:var(--ac)}.bd.done{background:var(--doneb);color:var(--done)}
-.pr{color:var(--dg);font-size:12px}
-.ac{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.ac button{padding:4px 10px;font-size:13px}
-.em{text-align:center;color:var(--mu);padding:30px}
-dialog{border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--tx);width:min(94vw,460px);padding:16px}
-dialog::backdrop{background:#0008}
-.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}.g .fl{grid-column:1/-1}
-label{font-size:12px;color:var(--mu);display:block}
-.sy{font-size:12px;color:var(--mu);text-align:center;margin-top:10px}
-@media(max-width:520px){.st{grid-template-columns:repeat(2,1fr)}.g{grid-template-columns:1fr}}
-
-.loginbox{max-width:420px;margin:10vh auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px}
-.loginbox h2{margin:0 0 8px}.loginbox label{margin-top:10px}.loginbox button{width:100%;margin-top:12px}
-#app{display:none}.top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Evacon | إدارة الطلبات العقارية</title>
+  <style>
+    :root {
+      --bg:#f6f7f9;--card:#fff;--tx:#1b2430;--mu:#6b7684;--bd:#e3e7ec;
+      --ac:#0f6e56;--acb:#e1f5ee;--new:#2563eb;--newb:#e6efff;
+      --done:#6b7684;--doneb:#eceff2;--dg:#c0392b;
+    }
+    @media (prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        --bg:#14181d;--card:#1e242b;--tx:#e8ecf0;--mu:#9aa5b1;--bd:#2f3740;
+        --ac:#3ecf9e;--acb:#173d31;--new:#7aa7ff;--newb:#1c2d4d;
+        --done:#9aa5b1;--doneb:#2a3139;--dg:#ff7a6b;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg:#14181d;--card:#1e242b;--tx:#e8ecf0;--mu:#9aa5b1;--bd:#2f3740;
+      --ac:#3ecf9e;--acb:#173d31;--new:#7aa7ff;--newb:#1c2d4d;
+      --done:#9aa5b1;--doneb:#2a3139;--dg:#ff7a6b;
+    }
+    * { box-sizing:border-box }
+    html { scroll-padding-top:env(safe-area-inset-top,0px) }
+    body {
+      margin:0;background:var(--bg);color:var(--tx);
+      font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.6;
+      padding-top:env(safe-area-inset-top,0px);
+      padding-bottom:env(safe-area-inset-bottom,0px);
+    }
+    .w { max-width:960px;margin:0 auto;padding:16px }
+    header { display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px }
+    h1 { font-size:20px;margin:0 }
+    button { font:inherit;cursor:pointer;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 12px }
+    button.p { background:var(--ac);color:#fff;border-color:var(--ac) }
+    button:disabled { opacity:.6;cursor:wait }
+    button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:2px solid var(--ac);outline-offset:2px }
+    .st { display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px }
+    .s { background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:10px;text-align:center }
+    .s b { display:block;font-size:22px }
+    .s span { font-size:12px;color:var(--mu) }
+    .tb { display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px }
+    .tb button.on { background:var(--ac);color:#fff;border-color:var(--ac) }
+    input,select,textarea { font:inherit;width:100%;padding:8px;border-radius:8px;border:1px solid var(--bd);background:var(--card);color:var(--tx) }
+    .f { display:flex;gap:8px;margin-bottom:12px }
+    .f input { flex:2;min-width:0 }
+    .f select { flex:1;min-width:120px }
+    .c { background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-bottom:10px }
+    .c h3 { margin:0 0 4px;font-size:16px;display:flex;justify-content:space-between;gap:8px;align-items:center }
+    .m { color:var(--mu);font-size:13px;display:flex;flex-wrap:wrap;gap:4px 14px }
+    .n { margin:6px 0 0;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere }
+    .bd { font-size:12px;padding:2px 10px;border-radius:99px;white-space:nowrap }
+    .bd.new { background:var(--newb);color:var(--new) }
+    .bd.act { background:var(--acb);color:var(--ac) }
+    .bd.done { background:var(--doneb);color:var(--done) }
+    .pr { color:var(--dg);font-size:12px }
+    .ac { display:flex;gap:6px;flex-wrap:wrap;margin-top:10px }
+    .ac button { padding:4px 10px;font-size:13px }
+    .em { text-align:center;color:var(--mu);padding:30px }
+    dialog { border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--tx);width:min(94vw,520px);max-height:90vh;overflow:auto;padding:16px }
+    dialog::backdrop { background:#0008 }
+    .g { display:grid;grid-template-columns:1fr 1fr;gap:8px }
+    .g .fl { grid-column:1/-1 }
+    label { font-size:12px;color:var(--mu);display:block }
+    .sy { font-size:12px;color:var(--mu);text-align:center;margin-top:10px }
+    .loginbox { max-width:420px;margin:10vh auto;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:20px }
+    .loginbox h2 { margin:0 0 8px }
+    .loginbox label { margin-top:10px }
+    .loginbox button { width:100%;margin-top:12px }
+    #app { display:none }
+    .top-actions { display:flex;gap:8px;align-items:center;flex-wrap:wrap }
+    .property-top { display:flex;gap:10px;justify-content:space-between;align-items:flex-start }
+    .property-top h3 { margin:0 }
+    .property-summary { margin-top:8px }
+    .property-details { margin-top:12px }
+    .property-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px }
+    .property-detail { min-width:0;border:1px solid var(--bd);border-radius:9px;padding:9px;background:var(--bg) }
+    .property-label { display:block;color:var(--mu);font-size:12px;margin-bottom:3px }
+    .property-detail strong { display:block;font-size:14px;font-weight:600;overflow-wrap:anywhere;white-space:pre-wrap }
+    .property-notes { margin-top:10px;padding:10px;background:var(--bg);border-radius:9px }
+    .property-notes p { margin:5px 0 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px }
+    .log-details { margin-top:7px;font-size:13px;overflow-wrap:anywhere }
+    .muted { color:var(--mu) }
+    .error { color:var(--dg) }
+    @media(max-width:520px) {
+      .st { grid-template-columns:repeat(2,1fr) }
+      .g { grid-template-columns:1fr }
+      .property-grid { gap:6px }
+      .property-detail { padding:7px }
+      .property-detail strong { font-size:13px }
+      .f { flex-wrap:wrap }
+      .f input,.f select { flex:1 1 100% }
+    }
+  </style>
 </head>
 <body>
-<section class="loginbox" id="loginbox">
-<h2>🏢 Evacon | تسجيل الدخول</h2>
-<p class="m">سجّل الدخول بحساب الموظف للوصول إلى الطلبات العقارية.</p>
-<label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="username" placeholder="name@company.com">
-<label for="password">كلمة المرور</label><input id="password" type="password" autocomplete="current-password" placeholder="كلمة المرور"><label for="accountType">نوع الحساب</label><select id="accountType"><option value="user">مستخدم عادي</option><option value="admin">أدمن</option></select>
-<button class="p" id="login">تسجيل الدخول</button><div class="sy" id="loginmsg"></div>
-</section>
-<div id="app"><div class="w">
-<header><h1>🏢 إدارة الطلبات</h1><div class="top-actions"><button id="logout">تسجيل الخروج</button><button class="p" id="add">+ طلب جديد</button></div></header>
-<div class="st" id="st"></div>
-<div class="tb" id="tb"></div><div class="tb"><button id="showRequests" class="on">الطلبات</button><button id="showProperties">مخزون الشقق</button><button id="showLogs" style="display:none">سجل النشاط</button><span class="m" id="roleLabel"></span></div>
-<div class="f"><input id="q" placeholder="ابحث بالاسم أو الموبايل أو المنطقة…"><select id="ag"><option value="">كل الموظفين</option></select></div>
-<div id="ls"></div><section id="properties" style="display:none"><div class="f"><input id="pq" placeholder="ابحث بالمشروع أو المنطقة أو الكود…"><select id="pstatus"><option value="">كل الحالات</option><option value="متاحة">متاحة</option><option value="محجوزة">محجوزة</option><option value="مباعة">مباعة</option></select></div><div class="ac" id="propertyActions"><button class="p" id="addProperty" style="display:none">+ إضافة شقة</button></div><div id="propertyList"></div></section><section id="logs" style="display:none"><div class="f"><select id="logType"><option value="">كل الأنشطة</option><option value="login">تسجيل دخول</option><option value="logout">تسجيل خروج</option><option value="request_created">إضافة طلب</option><option value="request_updated">تعديل طلب</option><option value="request_deleted">حذف طلب</option><option value="request_completed">إنهاء طلب</option></select><input id="logSearch" placeholder="ابحث باسم الموظف أو التفاصيل"></div><div id="logList"></div></section>
-<div class="sy" id="sy"></div>
-</div></div>
-<dialog id="dg"><form method="dialog" id="fm" style="margin:0">
-<h3 id="dt" style="margin-top:0">طلب جديد</h3>
-<div class="g">
-<div><label>اسم العميل</label><input id="nm" required></div>
-<div id="phoneField"><label>رقم الموبايل</label><input id="ph" inputmode="tel" autocomplete="off"></div>
-<div><label>نوع الطلب</label><select id="ty"><option>شراء</option><option>إيجار</option><option>بيع (مالك)</option><option>تأجير (مالك)</option></select></div>
-<div><label>نوع العقار</label><select id="pt"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>محل</option><option>مكتب</option><option>أرض</option></select></div>
-<div><label>المنطقة</label><input id="ar"></div>
-<div><label>الميزانية</label><input id="bu" inputmode="numeric"></div>
-<div><label>الموظف المسؤول</label><input id="am"></div>
-<div><label>الأولوية</label><select id="pr"><option>عادية</option><option>عاجلة</option></select></div>
-<div class="fl"><label>ملاحظات</label><textarea id="no" rows="3"></textarea></div>
-</div>
-<div class="ac"><button class="p" id="sv" type="submit">حفظ</button><button type="button" id="cn">إلغاء</button></div>
-</form></dialog>
-<dialog id="propertyDialog"><form method="dialog" id="propertyForm" style="margin:0">
-<h3 id="propertyTitle" style="margin-top:0">إضافة شقة</h3>
-<div class="g">
-<div><label>كود الوحدة (اختياري)</label><input id="pcode" placeholder="مثال: EV-001"></div>
-<div><label>اسم المشروع</label><input id="pproject" required></div>
-<div><label>المنطقة</label><input id="parea" required placeholder="مثال: بيت الوطن"></div>
-<div><label>نوع الوحدة</label><select id="ptype"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>استوديو</option><option>محل</option><option>مكتب</option><option>أرض</option></select></div>
-<div><label>المساحة بالمتر</label><input id="psize" type="number" min="0" step="0.01" required></div>
-<div><label>السعر الإجمالي بالجنيه</label><input id="pprice" type="number" min="0" step="0.01" required></div>
-<div><label>الدور</label><input id="pfloor" placeholder="مثال: الثالث"></div>
-<div><label>عدد الغرف</label><input id="pbedrooms" type="number" min="0"></div>
-<div><label>عدد الحمامات</label><input id="pbathrooms" type="number" min="0"></div>
-<div><label>مصدر الوحدة</label><select id="psource"><option value="مالك">مالك مباشر (Owner)</option><option value="بروكر">بروكر (Broker)</option></select></div>
-<div><label>اسم المالك / البروكر</label><input id="pcontact"></div>
-<div><label>رقم التواصل</label><input id="pcontactphone" type="tel" inputmode="tel"></div>
-<div><label>حالة الوحدة</label><select id="pstate"><option>متاحة</option><option>محجوزة</option><option>مباعة</option></select></div>
-<div class="fl"><label>ملاحظات وتفاصيل إضافية</label><textarea id="pnotes" rows="3" placeholder="التشطيب، الاستلام، طريقة الدفع..."></textarea></div>
-</div><div class="ac"><button class="p" type="submit">حفظ الوحدة</button><button type="button" id="propertyCancel">إلغاء</button></div>
-</form></dialog>
-<dialog id="feedbackDialog"><form method="dialog" id="feedbackForm"><h3>إنهاء الطلب</h3><label>سبب انتهاء الطلب</label><select id="feedbackReason"><option>تم البيع بنجاح</option><option>العميل اشترى من مكان آخر</option><option>العميل ألغى الطلب</option><option>عدم توافر العقار المناسب</option><option>العميل لم يعد مهتماً</option><option>سبب آخر</option></select><label>تفاصيل إضافية</label><textarea id="feedbackDetails" rows="3"></textarea><div class="ac"><button class="p" type="submit">تأكيد الإنهاء</button><button type="button" id="feedbackCancel">إلغاء</button></div></form></dialog>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-(function(){
+  <section class="loginbox" id="loginbox">
+    <h2>🏢 Evacon | تسجيل الدخول</h2>
+    <p class="m">سجّل الدخول بحساب الموظف للوصول إلى الطلبات العقارية.</p>
+    <label for="email">البريد الإلكتروني</label>
+    <input id="email" type="email" autocomplete="username" placeholder="name@company.com">
+    <label for="password">كلمة المرور</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="كلمة المرور">
+    <label for="accountType">نوع الحساب</label>
+    <select id="accountType"><option value="user">مستخدم عادي</option><option value="admin">أدمن</option></select>
+    <button class="p" id="login">تسجيل الدخول</button>
+    <div class="sy" id="loginmsg" role="status"></div>
+  </section>
 
-const SUPABASE_URL="https://fqktvstobrdvlsluskrq.supabase.co";
-const SUPABASE_KEY="sb_publishable_AuZ9JCANNGc-Bg1oKPHJ8Q__RUusPEz";
+  <div id="app"><div class="w">
+    <header>
+      <h1>🏢 إدارة الطلبات</h1>
+      <div class="top-actions"><button id="logout">تسجيل الخروج</button><button class="p" id="add">+ طلب جديد</button></div>
+    </header>
+    <div class="st" id="st"></div>
+    <div class="tb" id="tb"></div>
+    <div class="tb">
+      <button id="showRequests" class="on">الطلبات</button>
+      <button id="showProperties">مخزون الشقق</button>
+      <button id="showLogs" style="display:none">سجل النشاط</button>
+      <span class="m" id="roleLabel"></span>
+    </div>
+    <div class="f" id="requestFilters">
+      <input id="q" placeholder="ابحث بالاسم أو الموبايل أو المنطقة…">
+      <select id="ag"><option value="">كل الموظفين</option></select>
+    </div>
+    <div id="ls"></div>
 
-const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    <section id="properties" style="display:none">
+      <div class="f">
+        <input id="pq" placeholder="ابحث بالمشروع أو المنطقة أو الكود…">
+        <select id="pstatus">
+          <option value="">كل الحالات</option><option value="متاحة">متاحة</option>
+          <option value="محجوزة">محجوزة</option><option value="مباعة">مباعة</option>
+        </select>
+      </div>
+      <div class="ac" id="propertyActions">
+        <button class="p" id="addProperty" style="display:none">+ إضافة شقة</button>
+        <button id="expandAll">إظهار كل التفاصيل</button>
+        <button id="collapseAll">إخفاء كل التفاصيل</button>
+      </div>
+      <div id="propertyList"></div>
+    </section>
 
-const $=id=>document.getElementById(id);
-const ST={new:"جديد",act:"نشط",done:"منتهي"};
+    <section id="logs" style="display:none">
+      <div class="f">
+        <select id="logType">
+          <option value="">كل الأنشطة</option>
+          <option value="login">تسجيل دخول</option>
+          <option value="logout">تسجيل خروج</option>
+          <option value="request_created">إضافة طلب</option>
+          <option value="request_updated">تعديل طلب</option>
+          <option value="request_deleted">حذف طلب</option>
+          <option value="request_completed">إنهاء طلب</option>
+          <option value="property_created">إضافة وحدة</option>
+          <option value="property_updated">تعديل وحدة</option>
+          <option value="property_deleted">حذف وحدة</option>
+        </select>
+        <input id="logSearch" placeholder="ابحث باسم الموظف أو تفاصيل النشاط">
+      </div>
+      <div id="logList"></div>
+    </section>
+    <div class="sy" id="sy" role="status"></div>
+  </div></div>
 
-let data=[],logs=[],properties=[],tab="all",role="user";
-let currentUser=null,editId=null,propertyEditId=null;
-let channel=null,finishId=null,view="requests";
+  <dialog id="dg"><form id="fm" style="margin:0">
+    <h3 id="dt" style="margin-top:0">طلب جديد</h3>
+    <div class="g">
+      <div><label for="nm">اسم العميل</label><input id="nm" required></div>
+      <div id="phoneField"><label for="ph">رقم الموبايل</label><input id="ph" inputmode="tel" autocomplete="off"></div>
+      <div><label for="ty">نوع الطلب</label><select id="ty"><option>شراء</option><option>إيجار</option><option>بيع (مالك)</option><option>تأجير (مالك)</option></select></div>
+      <div><label for="pt">نوع العقار</label><select id="pt"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>محل</option><option>مكتب</option><option>أرض</option></select></div>
+      <div><label for="ar">المنطقة</label><input id="ar"></div>
+      <div><label for="bu">الميزانية</label><input id="bu" inputmode="numeric"></div>
+      <div><label for="am">الموظف المسؤول</label><input id="am"></div>
+      <div><label for="pr">الأولوية</label><select id="pr"><option>عادية</option><option>عاجلة</option></select></div>
+      <div class="fl"><label for="no">ملاحظات</label><textarea id="no" rows="3"></textarea></div>
+    </div>
+    <div class="ac"><button class="p" id="sv" type="submit">حفظ</button><button type="button" id="cn">إلغاء</button></div>
+  </form></dialog>
 
-const isAdmin=()=>role==="admin";
+  <dialog id="propertyDialog"><form id="propertyForm" style="margin:0">
+    <h3 id="propertyTitle" style="margin-top:0">إضافة شقة</h3>
+    <div class="g">
+      <div><label for="pcode">كود الوحدة (اختياري)</label><input id="pcode" placeholder="مثال: EV-001"></div>
+      <div><label for="pproject">اسم المشروع</label><input id="pproject" required></div>
+      <div><label for="parea">المنطقة</label><input id="parea" required placeholder="مثال: بيت الوطن"></div>
+      <div><label for="ptype">نوع الوحدة</label><select id="ptype"><option>شقة</option><option>فيلا</option><option>دوبلكس</option><option>استوديو</option><option>محل</option><option>مكتب</option><option>أرض</option></select></div>
+      <div><label for="psize">المساحة بالمتر</label><input id="psize" type="number" min="0.01" step="0.01" required></div>
+      <div><label for="pprice">السعر الإجمالي بالجنيه</label><input id="pprice" type="number" min="0.01" step="0.01" required></div>
+      <div><label for="pfloor">الدور</label><input id="pfloor" placeholder="مثال: الثالث"></div>
+      <div><label for="pbedrooms">عدد الغرف</label><input id="pbedrooms" type="number" min="0" step="1"></div>
+      <div><label for="pbathrooms">عدد الحمامات</label><input id="pbathrooms" type="number" min="0" step="1"></div>
+      <div><label for="psource">مصدر الوحدة</label><select id="psource"><option value="مالك">مالك مباشر (Owner)</option><option value="بروكر">بروكر (Broker)</option></select></div>
+      <div><label for="pcontact">اسم المالك / البروكر</label><input id="pcontact"></div>
+      <div><label for="pcontactphone">رقم التواصل (للأدمن فقط)</label><input id="pcontactphone" type="tel" inputmode="tel"></div>
+      <div><label for="pstate">حالة الوحدة</label><select id="pstate"><option>متاحة</option><option>محجوزة</option><option>مباعة</option></select></div>
+      <div class="fl"><label for="pnotes">ملاحظات وتفاصيل إضافية</label><textarea id="pnotes" rows="3" placeholder="التشطيب، الاستلام، طريقة الدفع..."></textarea></div>
+    </div>
+    <div class="ac"><button class="p" id="savePropertyButton" type="submit">حفظ الوحدة</button><button type="button" id="propertyCancel">إلغاء</button></div>
+  </form></dialog>
 
-function esc(v){
-    return String(v??"").replace(/[&<>"]/g,c=>({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"
-    }[c]));
-}
+  <dialog id="feedbackDialog"><form id="feedbackForm">
+    <h3>إنهاء الطلب</h3>
+    <label for="feedbackReason">سبب انتهاء الطلب</label>
+    <select id="feedbackReason">
+      <option>تم البيع بنجاح</option><option>العميل اشترى من مكان آخر</option><option>العميل ألغى الطلب</option>
+      <option>عدم توافر العقار المناسب</option><option>العميل لم يعد مهتماً</option><option>سبب آخر</option>
+    </select>
+    <label for="feedbackDetails">تفاصيل إضافية</label><textarea id="feedbackDetails" rows="3"></textarea>
+    <div class="ac"><button class="p" type="submit">تأكيد الإنهاء</button><button type="button" id="feedbackCancel">إلغاء</button></div>
+  </form></dialog>
 
-function say(id,t){
-    $(id).textContent=t;
-}
-
-function date(v){
-    return v?new Date(v).toLocaleString("ar-EG"):"—";
-}
-
-function fromDb(x){
-    return {...x,id:x.id,createdAt:Number(x.created_at)||Date.now(),updatedAt:Number(x.updated_at)||Date.now()};
-}
-
-function toDb(id,o){
-    return {
-        id,name:o.name,phone:o.phone,type:o.type,
-        ptype:o.ptype,area:o.area,budget:o.budget,
-        agent:o.agent,priority:o.priority,notes:o.notes,
-        status:o.status,
-        feedback_reason:o.feedback_reason||null,
-        feedback_details:o.feedback_details||null,
-        created_at:o.createdAt,updated_at:o.updatedAt
-    };
-}
-
-async function logEvent(action,details={}){
-    try{
-        await client.rpc("log_user_activity",{
-            p_action:action,
-            p_details:details
-        });
-    }catch(e){
-        console.warn("Activity log:",e.message);
-    }
-}
-
-async function load(){
-    say("sy","جارٍ تحميل الطلبات...");
-
-    let {data:rows,error}=await client.rpc("get_requests_for_current_user");
-
-    if(error){
-        say("sy","تعذر تحميل الطلبات: "+error.message);
-        return;
-    }
-
-    data=(rows||[]).map(fromDb);
-    render();
-    say("sy","🟢 متصل بقاعدة بيانات Evacon");
-}
-
-// حفظ الطلب - الأدمن فقط
-async function save(id,o){
-
-    if(!isAdmin()){
-        alert("غير مسموح لك بإضافة أو تعديل الطلبات");
-        return;
-    }
-
-    say("sy","جارٍ الحفظ...");
-
-    let {error}=await client.from("requests").upsert(toDb(id,o));
-
-    if(error){
-        alert("فشل الحفظ: "+error.message);
-        return;
-    }
-
-    $("dg").close();
-    await load();
-}
-
-// فتح نموذج الطلب - الأدمن فقط
-function openForm(r){
-
-    if(!isAdmin()){
-        alert("إضافة الطلبات متاحة للأدمن فقط");
-        return;
-    }
-
-    editId=r?.id||null;
-
-    $("dt").textContent=r?"تعديل الطلب":"طلب جديد";
-
-    $("fm").reset();
-
-    $("phoneField").style.display="";
-
-    const fields={
-        nm:"name",
-        ph:"phone",
-        ar:"area",
-        bu:"budget",
-        am:"agent",
-        no:"notes"
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  (function () {
+    "use strict";
+    const SUPABASE_URL = "https://fqktvstobrdvlsluskrq.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_AuZ9JCANNGc-Bg1oKPHJ8Q__RUusPEz";
+    const $ = id => document.getElementById(id);
+    const ST = { new:"جديد", act:"نشط", done:"منتهي" };
+    const LOG_TITLES = {
+      login:"تسجيل دخول", logout:"تسجيل خروج", request_created:"إضافة طلب",
+      request_updated:"تعديل طلب", request_deleted:"حذف طلب", request_completed:"إنهاء طلب",
+      property_created:"إضافة وحدة", property_updated:"تعديل وحدة", property_deleted:"حذف وحدة"
     };
 
-    Object.keys(fields).forEach(k=>{
-        $(k).value=r?.[fields[k]]||"";
-    });
+    if (!window.supabase) {
+      $("loginmsg").textContent = "تعذّر تحميل مكتبة Supabase. تأكد من الاتصال بالإنترنت.";
+      return;
+    }
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let data = [], logs = [], properties = [], tab = "all", role = "user";
+    let currentUser = null, editId = null, propertyEditId = null, finishId = null;
+    let view = "requests", propertyBusy = false;
+    const collapsedPropertyIds = new Set(); // كل تفاصيل الوحدات ظاهرة تلقائيًا
 
-    $("ty").value=r?.type||"شراء";
-    $("pt").value=r?.ptype||"شقة";
-    $("pr").value=r?.priority||"عادية";
-
-    $("dg").showModal();
-}
-
-async function removeRequest(id){
-
-    if(!isAdmin())return;
-
-    if(!confirm("حذف الطلب نهائيًا؟"))return;
-
-    let {error}=await client.from("requests").delete().eq("id",id);
-
-    if(error){
-        alert("تعذر الحذف: "+error.message);
-        return;
+    const isAdmin = () => role === "admin";
+    function esc(v) {
+      return String(v ?? "").replace(/[&<>"']/g, c => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+      })[c]);
+    }
+    function say(id, message) { $(id).textContent = message; }
+    function date(v) {
+      if (!v) return "—";
+      const parsed = new Date(typeof v === "string" && /^\d+$/.test(v) ? Number(v) : v);
+      return Number.isNaN(parsed.getTime()) ? "—" : parsed.toLocaleString("ar-EG");
+    }
+    function plain(v) { return v === null || v === undefined || String(v).trim() === "" ? "—" : esc(v); }
+    function formatMoney(v) { return v === null || v === undefined || v === "" ? "—" : Number(v).toLocaleString("ar-EG") + " جنيه"; }
+    function fromDb(x) {
+      return { ...x, id:x.id, createdAt:Number(x.created_at) || Date.now(), updatedAt:Number(x.updated_at) || Date.now() };
+    }
+    function toDb(id, o) {
+      return {
+        id, name:o.name, phone:o.phone, type:o.type, ptype:o.ptype, area:o.area,
+        budget:o.budget, agent:o.agent, priority:o.priority, notes:o.notes,
+        status:o.status, feedback_reason:o.feedback_reason || null,
+        feedback_details:o.feedback_details || null,
+        created_at:o.createdAt, updated_at:o.updatedAt
+      };
+    }
+    async function logEvent(action, details = {}) {
+      try {
+        const { error } = await client.rpc("log_user_activity", { p_action:action, p_details:details });
+        if (error) console.warn("Activity log:", error.message);
+      } catch (e) { console.warn("Activity log:", e); }
     }
 
-    await load();
-}
-
-function render(){
-
-    $("add").style.display=isAdmin()?"":"none";
-    $("addProperty").style.display=isAdmin()?"":"none";
-    $("showLogs").style.display=isAdmin()?"":"none";
-
-    $("roleLabel").textContent=
-        (isAdmin()?"الأدمن":"مستخدم عادي")+" — "+(currentUser?.email||"");
-
-    const counts={all:data.length,new:0,act:0,done:0};
-
-    data.forEach(r=>{
-        if(counts[r.status]!==undefined)counts[r.status]++;
-    });
-
-    $("st").innerHTML=[
-        ["all","الكل"],
-        ["new","جديد"],
-        ["act","نشط"],
-        ["done","منتهي"]
-    ].map(a=>`
-        <div class="s">
-            <b>${counts[a[0]]}</b>
-            <span>${a[1]}</span>
-        </div>
-    `).join("");
-
-    $("tb").innerHTML=[
-        ["all","الكل"],
-        ["new","الجديدة"],
-        ["act","النشطة"],
-        ["done","المنتهية"]
-    ].map(a=>`
-        <button data-t="${a[0]}" class="${tab===a[0]?"on":""}">
-            ${a[1]} (${counts[a[0]]})
-        </button>
-    `).join("");
-
-    const agents=[...new Set(data.map(r=>r.agent).filter(Boolean))];
-    const cur=$("ag").value;
-
-    $("ag").innerHTML=
-        '<option value="">كل الموظفين</option>'+
-        agents.map(a=>`<option ${a===cur?'selected':''}>${esc(a)}</option>`).join("");
-
-    const q=$("q").value.trim().toLowerCase();
-    const ag=$("ag").value;
-
-    const list=data.filter(r=>
-        (tab==="all"||r.status===tab)&&
-        (!ag||r.agent===ag)&&
-        (!q||(r.name+" "+r.phone+" "+r.area).toLowerCase().includes(q))
-    ).sort((a,b)=>
-        (b.priority==="عاجلة"&&b.status!=="done")-
-        (a.priority==="عاجلة"&&a.status!=="done")||
-        (b.createdAt-a.createdAt)
-    );
-
-    $("ls").innerHTML=list.length?list.map(r=>{
-
-        let actions="";
-
-        if(isAdmin()){
-
-            if(r.status!=="done")
-                actions+=`<button data-a="finish" data-i="${esc(r.id)}">✔ إنهاء الطلب</button>`;
-            else
-                actions+=`<button data-a="reopen" data-i="${esc(r.id)}">↺ إعادة فتح</button>`;
-
-            actions+=`
-                <button data-a="edit" data-i="${esc(r.id)}">تعديل</button>
-                <button data-a="del" data-i="${esc(r.id)}">حذف</button>
-            `;
+    async function load() {
+      say("sy", "جارٍ تحميل الطلبات...");
+      const { data:rows, error } = await client.rpc("get_requests_for_current_user");
+      if (error) { say("sy", "تعذّر تحميل الطلبات: " + error.message); return; }
+      data = (rows || []).map(fromDb);
+      render();
+      say("sy", "🟢 متصل بقاعدة بيانات Evacon");
+    }
+    async function save(id, o) {
+      if (!isAdmin()) return alert("غير مسموح لك بإضافة أو تعديل الطلبات");
+      say("sy", "جارٍ الحفظ...");
+      const { error } = await client.from("requests").upsert(toDb(id, o));
+      if (error) { alert("فشل الحفظ: " + error.message); return; }
+      $("dg").close();
+      await load();
+    }
+    function openForm(r) {
+      if (!isAdmin()) return alert("إضافة الطلبات متاحة للأدمن فقط");
+      editId = r?.id || null;
+      $("dt").textContent = r ? "تعديل الطلب" : "طلب جديد";
+      $("fm").reset();
+      const fields = { nm:"name", ph:"phone", ar:"area", bu:"budget", am:"agent", no:"notes" };
+      Object.entries(fields).forEach(([id, field]) => { $(id).value = r?.[field] ?? ""; });
+      $("ty").value = r?.type || "شراء";
+      $("pt").value = r?.ptype || "شقة";
+      $("pr").value = r?.priority || "عادية";
+      $("dg").showModal();
+    }
+    async function removeRequest(id) {
+      if (!isAdmin() || !confirm("حذف الطلب نهائيًا؟")) return;
+      const { error } = await client.from("requests").delete().eq("id", id);
+      if (error) return alert("تعذّر الحذف: " + error.message);
+      await load();
+    }
+    function render() {
+      $("add").style.display = isAdmin() ? "" : "none";
+      $("addProperty").style.display = isAdmin() ? "" : "none";
+      $("showLogs").style.display = isAdmin() ? "" : "none";
+      $("roleLabel").textContent = (isAdmin() ? "الأدمن" : "مستخدم عادي") + " — " + (currentUser?.email || "");
+      const counts = { all:data.length, new:0, act:0, done:0 };
+      data.forEach(r => { if (counts[r.status] !== undefined) counts[r.status]++; });
+      $("st").innerHTML = [["all","الكل"],["new","جديد"],["act","نشط"],["done","منتهي"]]
+        .map(([k,label]) => `<div class="s"><b>${counts[k]}</b><span>${label}</span></div>`).join("");
+      $("tb").innerHTML = [["all","الكل"],["new","الجديدة"],["act","النشطة"],["done","المنتهية"]]
+        .map(([k,label]) => `<button data-t="${k}" class="${tab === k ? "on" : ""}">${label} (${counts[k]})</button>`).join("");
+      const agents = [...new Set(data.map(r => r.agent).filter(Boolean))];
+      const oldAgent = $("ag").value;
+      $("ag").innerHTML = '<option value="">كل الموظفين</option>' + agents.map(a => `<option value="${esc(a)}" ${a === oldAgent ? "selected" : ""}>${esc(a)}</option>`).join("");
+      const q = $("q").value.trim().toLowerCase(), ag = $("ag").value;
+      const list = data.filter(r =>
+        (tab === "all" || r.status === tab) && (!ag || r.agent === ag) &&
+        (!q || [r.name, isAdmin() ? r.phone : "", r.area].join(" ").toLowerCase().includes(q))
+      ).sort((a,b) =>
+        Number(b.priority === "عاجلة" && b.status !== "done") -
+        Number(a.priority === "عاجلة" && a.status !== "done") || (b.createdAt - a.createdAt)
+      );
+      $("ls").innerHTML = list.length ? list.map(r => {
+        let actions = "";
+        if (isAdmin()) {
+          actions += r.status !== "done"
+            ? `<button data-a="finish" data-i="${esc(r.id)}">✔ إنهاء الطلب</button>`
+            : `<button data-a="reopen" data-i="${esc(r.id)}">↺ إعادة فتح</button>`;
+          actions += ` <button data-a="edit" data-i="${esc(r.id)}">تعديل</button> <button data-a="del" data-i="${esc(r.id)}">حذف</button>`;
         }
+        const phone = String(r.phone || "").replace(/[^\d+]/g, "");
+        return `<div class="c">
+          <h3><span>${plain(r.name)}</span><span class="bd ${esc(r.status)}">${ST[r.status] || "غير محدد"}</span></h3>
+          <div class="m">
+            <span>${plain(r.type)} · ${plain(r.ptype)}</span>
+            ${r.area ? `<span>📍 ${esc(r.area)}</span>` : ""}
+            ${r.budget ? `<span>💰 ${esc(r.budget)}</span>` : ""}
+            ${isAdmin() && r.phone ? `<span>📞 ${esc(r.phone)}</span>` : ""}
+            ${r.agent ? `<span>👤 ${esc(r.agent)}</span>` : ""}
+            <span>🗓 ${date(r.createdAt)}</span>
+          </div>
+          ${r.notes ? `<p class="n">${esc(r.notes)}</p>` : ""}
+          <div class="ac">${actions}
+            ${isAdmin() && phone ? `<a href="tel:${esc(phone)}"><button type="button">اتصال</button></a>` : ""}
+          </div>
+        </div>`;
+      }).join("") : '<div class="em">مفيش طلبات هنا</div>';
+    }
 
-        return `
-        <div class="c">
-            <h3>
-                <span>${esc(r.name)}</span>
-                <span class="bd ${esc(r.status)}">${ST[r.status]||"غير محدد"}</span>
-            </h3>
-
-            <div class="m">
-                <span>${esc(r.type)} · ${esc(r.ptype)}</span>
-                ${r.area?`<span>📍 ${esc(r.area)}</span>`:""}
-                ${r.budget?`<span>💰 ${esc(r.budget)}</span>`:""}
-                ${isAdmin()&&r.phone?`<span>📞 ${esc(r.phone)}</span>`:""}
-                ${r.agent?`<span>👤 ${esc(r.agent)}</span>`:""}
-                <span>🗓 ${date(r.createdAt)}</span>
+    // مخزون الوحدات: القراءة والحفظ والحذف من دوال آمنة داخل Supabase.
+    // يجب تشغيل ملف SQL المرفق مرة واحدة قبل استعمال النسخة الجديدة.
+    async function loadProperties() {
+      $("propertyList").innerHTML = '<div class="em">جارٍ تحميل الوحدات...</div>';
+      const { data:rows, error } = await client.rpc("evacon_get_properties");
+      if (error) {
+        $("propertyList").innerHTML = `<div class="em error">تعذّر تحميل الوحدات: ${esc(error.message)}<div>تأكد من تنفيذ كود SQL المرفق في Supabase.</div></div>`;
+        return;
+      }
+      properties = rows || [];
+      renderProperties();
+    }
+    function propDetail(label, value) {
+      return `<div class="property-detail"><span class="property-label">${esc(label)}</span><strong>${plain(value)}</strong></div>`;
+    }
+    function renderProperties() {
+      const q = $("pq").value.trim().toLowerCase(), st = $("pstatus").value;
+      const rows = properties.filter(x =>
+        (!st || x.status === st) &&
+        (!q || [x.code,x.project,x.area,x.property_type,x.source_type,x.contact_name,x.notes].join(" ").toLowerCase().includes(q))
+      );
+      $("addProperty").style.display = isAdmin() ? "" : "none";
+      $("propertyList").innerHTML = rows.length ? rows.map(x => {
+        const collapsed = collapsedPropertyIds.has(String(x.id));
+        const statusClass = x.status === "متاحة" ? "act" : x.status === "محجوزة" ? "new" : "done";
+        const source = x.source_type === "مالك" ? "مالك مباشر" : x.source_type === "بروكر" ? "بروكر" : x.source_type;
+        return `<article class="c property-card">
+          <div class="property-top"><h3>${plain(x.project)}</h3><span class="bd ${statusClass}">${plain(x.status)}</span></div>
+          <div class="m property-summary">
+            <span>🔖 ${plain(x.code)}</span>
+            <span>📍 ${plain(x.area)}</span>
+            <span>🏠 ${plain(x.property_type)}</span>
+            <span>📐 ${x.size_m2 == null ? "—" : esc(x.size_m2) + " م²"}</span>
+            <span>💰 ${formatMoney(x.price)}</span>
+          </div>
+          ${collapsed ? "" : `<div class="property-details">
+            <div class="property-grid">
+              ${propDetail("كود الوحدة",x.code)}
+              ${propDetail("اسم المشروع",x.project)}
+              ${propDetail("المنطقة",x.area)}
+              ${propDetail("نوع الوحدة",x.property_type)}
+              ${propDetail("المساحة",x.size_m2 == null ? null : x.size_m2 + " م²")}
+              ${propDetail("السعر الإجمالي",formatMoney(x.price).replace(/&/g,"&amp;"))}
+              ${propDetail("الدور",x.floor)}
+              ${propDetail("عدد الغرف",x.bedrooms)}
+              ${propDetail("عدد الحمامات",x.bathrooms)}
+              ${propDetail("مصدر الوحدة",source)}
+              ${propDetail("اسم المالك / البروكر",x.contact_name)}
+              ${isAdmin() ? propDetail("رقم تليفون المالك / البروكر",x.contact_phone) : ""}
+              ${propDetail("تاريخ الإضافة",date(x.created_at))}
+              ${propDetail("آخر تحديث",date(x.updated_at))}
             </div>
-
-            ${r.notes?`<p class="n">${esc(r.notes)}</p>`:""}
-
-            <div class="ac">
-                ${actions}
-                ${isAdmin()&&r.phone?`<a href="tel:${esc(r.phone)}"><button type="button">اتصال</button></a>`:""}
-            </div>
-        </div>
-        `;
-    }).join(""):'<div class="em">مفيش طلبات هنا</div>';
-}
-
-function propertyFromDb(x){
-    return {...x,size_m2:Number(x.size_m2)||0,price:Number(x.price)||0};
-}
-
-async function loadProperties(){
-
-    let {data:rows,error}=await client.rpc("get_properties_for_current_user");
-
-    if(error){
-        $("propertyList").innerHTML='<div class="em">تعذر تحميل مخزون الشقق</div>';
-        return;
+            <div class="property-notes"><span class="property-label">ملاحظات وتفاصيل إضافية</span><p>${plain(x.notes)}</p></div>
+          </div>`}
+          <div class="ac">
+            <button type="button" data-pa="toggle" data-pid="${esc(x.id)}" aria-expanded="${!collapsed}">${collapsed ? "عرض كل التفاصيل" : "إخفاء التفاصيل"}</button>
+            ${isAdmin() ? `<button type="button" data-pa="edit" data-pid="${esc(x.id)}">تعديل</button>
+            <button type="button" data-pa="delete" data-pid="${esc(x.id)}">حذف</button>` : ""}
+          </div>
+        </article>`;
+      }).join("") : '<div class="em">لا توجد وحدات مسجلة وفقًا للفلاتر</div>';
+    }
+    function openPropertyForm(x) {
+      if (!isAdmin()) return;
+      propertyEditId = x?.id || null;
+      $("propertyForm").reset();
+      $("propertyTitle").textContent = x ? "تعديل بيانات الوحدة" : "إضافة وحدة جديدة";
+      const fields = {
+        pcode:"code", pproject:"project", parea:"area", psize:"size_m2",
+        pprice:"price", pfloor:"floor", pbedrooms:"bedrooms", pbathrooms:"bathrooms",
+        pcontact:"contact_name", pcontactphone:"contact_phone", pnotes:"notes"
+      };
+      Object.entries(fields).forEach(([id, field]) => { $(id).value = x?.[field] ?? ""; });
+      $("ptype").value = x?.property_type || "شقة";
+      $("psource").value = x?.source_type || "مالك";
+      $("pstate").value = x?.status || "متاحة";
+      $("propertyDialog").showModal();
+    }
+    function optionalInteger(id) {
+      // يحفظ القيمة 0 كما هي؛ يحوّل الحقل الفارغ فقط إلى null.
+      const raw = $(id).value.trim();
+      return raw === "" ? null : Number(raw);
+    }
+    async function saveProperty() {
+      if (!isAdmin()) return alert("غير مسموح لك بإضافة أو تعديل الوحدات");
+      if (propertyBusy) return;
+      const size = Number($("psize").value), price = Number($("pprice").value);
+      const bedrooms = optionalInteger("pbedrooms"), bathrooms = optionalInteger("pbathrooms");
+      if (!$("pproject").value.trim() || !$("parea").value.trim() || !(size > 0) || !(price > 0)) {
+        return alert("اكتب المشروع والمنطقة ومساحة وسعر صحيحين");
+      }
+      if ([bedrooms,bathrooms].some(v => v !== null && (!Number.isInteger(v) || v < 0))) {
+        return alert("عدد الغرف والحمامات يجب أن يكون عددًا صحيحًا غير سالب");
+      }
+      const id = propertyEditId || ("p" + Date.now().toString(36) + Math.random().toString(36).slice(2,8));
+      const payload = {
+        id, code:$("pcode").value.trim() || null, project:$("pproject").value.trim(),
+        area:$("parea").value.trim(), property_type:$("ptype").value,
+        size_m2:size, price, floor:$("pfloor").value.trim() || null,
+        bedrooms, bathrooms, source_type:$("psource").value,
+        contact_name:$("pcontact").value.trim() || null,
+        contact_phone:$("pcontactphone").value.trim() || null,
+        status:$("pstate").value, notes:$("pnotes").value.trim() || null
+      };
+      propertyBusy = true;
+      $("savePropertyButton").disabled = true;
+      const { error } = await client.rpc("evacon_save_property", { p_payload:payload });
+      propertyBusy = false;
+      $("savePropertyButton").disabled = false;
+      if (error) return alert("تعذّر حفظ الوحدة: " + error.message);
+      $("propertyDialog").close();
+      await loadProperties();
+    }
+    async function deleteProperty(id) {
+      if (!isAdmin() || !confirm("هل تريد حذف الوحدة نهائيًا؟")) return;
+      const { error } = await client.rpc("evacon_delete_property", { p_id:String(id) });
+      if (error) return alert("تعذّر حذف الوحدة: " + error.message);
+      collapsedPropertyIds.delete(String(id));
+      await loadProperties();
     }
 
-    properties=(rows||[]).map(propertyFromDb);
-    renderProperties();
-}
-
-function renderProperties(){
-
-    const q=$("pq").value.trim().toLowerCase();
-    const st=$("pstatus").value;
-
-    const rows=properties.filter(x=>
-        (!st||x.status===st)&&
-        (!q||[x.code,x.project,x.area,x.property_type,x.source_type].join(" ").toLowerCase().includes(q))
-    );
-
-    $("addProperty").style.display=isAdmin()?"":"none";
-
-    $("propertyList").innerHTML=rows.length?rows.map(x=>`
-        <div class="c">
-            <h3>${esc(x.project)}</h3>
-            <div class="m">
-                <span>📍 ${esc(x.area)}</span>
-                <span>🏠 ${esc(x.property_type)}</span>
-                <span>📐 ${esc(x.size_m2)} م²</span>
-                <span>💰 ${Number(x.price).toLocaleString("ar-EG")} جنيه</span>
-            </div>
-            ${isAdmin()?`
-                <div class="ac">
-                    <button data-pa="edit" data-pid="${esc(x.id)}">تعديل</button>
-                    <button data-pa="delete" data-pid="${esc(x.id)}">حذف</button>
-                </div>
-            `:""}
-        </div>
-    `).join(""):'<div class="em">لا توجد وحدات مسجلة</div>';
-}
-
-function openPropertyForm(x){
-
-    if(!isAdmin())return;
-
-    propertyEditId=x?.id||null;
-
-    $("propertyTitle").textContent=x?"تعديل بيانات الشقة":"إضافة شقة جديدة";
-
-    const fields={
-        pcode:"code",pproject:"project",parea:"area",
-        psize:"size_m2",pprice:"price",pfloor:"floor",
-        pbedrooms:"bedrooms",pbathrooms:"bathrooms",
-        pcontact:"contact_name",pcontactphone:"contact_phone",
-        pnotes:"notes"
-    };
-
-    Object.keys(fields).forEach(k=>{
-        $(k).value=x?.[fields[k]]??"";
-    });
-
-    $("ptype").value=x?.property_type||"شقة";
-    $("psource").value=x?.source_type||"مالك";
-    $("pstate").value=x?.status||"متاحة";
-
-    $("propertyDialog").showModal();
-}
-
-async function saveProperty(){
-
-    if(!isAdmin())return alert("غير مسموح لك بإضافة أو تعديل الوحدات");
-
-    const size=Number($("psize").value);
-    const price=Number($("pprice").value);
-
-    if(!$("pproject").value.trim()||!$("parea").value.trim()||!(size>0)||!(price>0)){
-        alert("اكتب المشروع والمنطقة ومساحة وسعر صحيحين");
+    async function loadLogs() {
+      if (!isAdmin()) return;
+      $("logList").innerHTML = '<div class="em">جارٍ تحميل سجل النشاط...</div>';
+      const { data:rows, error } = await client.from("activity_logs")
+        .select("*").order("created_at", { ascending:false }).limit(300);
+      if (error) {
+        $("logList").innerHTML = `<div class="em error">تعذّر تحميل السجلات: ${esc(error.message)}</div>`;
         return;
+      }
+      logs = rows || [];
+      renderLogs();
     }
-
-    const payload={
-        id:propertyEditId||("p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
-        code:$("pcode").value.trim()||null,
-        project:$("pproject").value.trim(),
-        area:$("parea").value.trim(),
-        property_type:$("ptype").value,
-        size_m2:size,
-        price:price,
-        floor:$("pfloor").value.trim()||null,
-        bedrooms:Number($("pbedrooms").value)||null,
-        bathrooms:Number($("pbathrooms").value)||null,
-        source_type:$("psource").value,
-        contact_name:$("pcontact").value.trim()||null,
-        contact_phone:$("pcontactphone").value.trim()||null,
-        status:$("pstate").value,
-        notes:$("pnotes").value.trim()||null,
-        updated_at:Date.now()
-    };
-
-    if(!propertyEditId)payload.created_at=Date.now();
-
-    let {error}=await client.from("properties").upsert(payload);
-
-    if(error){
-        alert("تعذر حفظ الوحدة: "+error.message);
-        return;
+    function renderLogs() {
+      const type = $("logType").value, q = $("logSearch").value.trim().toLowerCase();
+      const rows = logs.filter(x =>
+        (!type || x.action === type) &&
+        (!q || [x.user_email, LOG_TITLES[x.action], JSON.stringify(x.details || {})].join(" ").toLowerCase().includes(q))
+      );
+      $("logList").innerHTML = rows.length ? rows.map(x => {
+        const d = x.details || {};
+        const parts = [
+          d.project ? `المشروع: ${esc(d.project)}` : "",
+          d.area ? `المنطقة: ${esc(d.area)}` : "",
+          d.property_id ? `كود السجل: ${esc(d.property_id)}` : "",
+          d.code ? `كود الوحدة: ${esc(d.code)}` : ""
+        ].filter(Boolean);
+        const details = parts.length ? parts.join(" · ") : (Object.keys(d).length ? esc(JSON.stringify(d)) : "");
+        return `<div class="c"><h3>${esc(LOG_TITLES[x.action] || x.action)}</h3>
+          <div class="m"><span>👤 ${plain(x.user_email || "مستخدم غير معروف")}</span>
+          <span>🕒 ${date(x.created_at)}</span></div>
+          ${details ? `<div class="log-details">${details}</div>` : ""}
+        </div>`;
+      }).join("") : '<div class="em">لا توجد سجلات</div>';
     }
-
-    $("propertyDialog").close();
-    await loadProperties();
-}
-
-async function deleteProperty(id){
-
-    if(!isAdmin()||!confirm("هل تريد حذف الوحدة نهائيًا؟"))return;
-
-    let {error}=await client.from("properties").delete().eq("id",id);
-
-    if(error){
-        alert("تعذر حذف الوحدة: "+error.message);
-        return;
+    async function setView(v) {
+      if (v === "logs" && !isAdmin()) return;
+      view = v;
+      $("ls").style.display = v === "requests" ? "" : "none";
+      $("st").style.display = v === "requests" ? "" : "none";
+      $("tb").style.display = v === "requests" ? "" : "none";
+      $("requestFilters").style.display = v === "requests" ? "" : "none";
+      $("properties").style.display = v === "properties" ? "" : "none";
+      $("logs").style.display = v === "logs" ? "" : "none";
+      $("showRequests").classList.toggle("on", v === "requests");
+      $("showProperties").classList.toggle("on", v === "properties");
+      $("showLogs").classList.toggle("on", v === "logs");
+      if (v === "logs") await loadLogs();
+      if (v === "properties") await loadProperties();
     }
-
-    await loadProperties();
-}
-
-async function loadLogs(){
-
-    if(!isAdmin())return;
-
-    let {data:rows,error}=await client.from("activity_logs")
-        .select("*").order("created_at",{ascending:false}).limit(300);
-
-    if(error){
-        $("logList").innerHTML='<div class="em">تعذر تحميل السجلات</div>';
-        return;
-    }
-
-    logs=rows||[];
-    renderLogs();
-}
-
-function renderLogs(){
-
-    let type=$("logType").value;
-    let q=$("logSearch").value.toLowerCase();
-
-    let rows=logs.filter(x=>
-        (!type||x.action===type)&&
-        (!q||((x.user_email||"")+" "+JSON.stringify(x.details||{})).toLowerCase().includes(q))
-    );
-
-    $("logList").innerHTML=rows.length?rows.map(x=>`
-        <div class="c">
-            <h3>${esc(x.action)}</h3>
-            <div class="m">
-                <span>👤 ${esc(x.user_email||"مستخدم غير معروف")}</span>
-                <span>🕒 ${date(x.created_at)}</span>
-            </div>
-        </div>
-    `).join(""):'<div class="em">لا توجد سجلات</div>';
-}
-
-async function setView(v){
-
-    view=v;
-
-    $("ls").style.display=v==="requests"?"":"none";
-    $("st").style.display=v==="requests"?"":"none";
-    $("tb").style.display=v==="requests"?"":"none";
-    $("q").parentElement.style.display=v==="requests"?"":"none";
-    $("properties").style.display=v==="properties"?"":"none";
-    $("logs").style.display=v==="logs"?"":"none";
-
-    $("showRequests").classList.toggle("on",v==="requests");
-    $("showProperties").classList.toggle("on",v==="properties");
-    $("showLogs").classList.toggle("on",v==="logs");
-
-    if(v==="logs")await loadLogs();
-    if(v==="properties")await loadProperties();
-}
-
-async function enterApp(user){
-
-    currentUser=user;
-
-    let {data:profile,error}=await client.from("profiles")
-        .select("role,full_name").eq("id",user.id).single();
-
-    if(error||!profile){
+    async function enterApp(user) {
+      currentUser = user;
+      const { data:profile, error } = await client.from("profiles")
+        .select("role,full_name").eq("id", user.id).single();
+      if (error || !profile) {
         await client.auth.signOut();
-        say("loginmsg","الحساب غير مضاف إلى profiles.");
+        say("loginmsg", "الحساب غير مضاف إلى profiles.");
         return;
-    }
-
-    role=String(profile.role||"").trim().toLowerCase();
-
-    $("loginbox").style.display="none";
-    $("app").style.display="block";
-
-    $("q").placeholder=isAdmin()?
-        "ابحث بالاسم أو الموبايل أو المنطقة…":
-        "ابحث بالاسم أو المنطقة…";
-
-    await load();
-    await setView("requests");
-}
-
-async function showLogin(){
-
-    $("app").style.display="none";
-    $("loginbox").style.display="block";
-}
-
-// تسجيل الدخول
-$("login").onclick=async()=>{
-
-    let email=$("email").value.trim();
-    let password=$("password").value;
-
-    if(!email||!password){
-        say("loginmsg","اكتب البريد الإلكتروني وكلمة المرور");
-        return;
-    }
-
-    say("loginmsg","جارٍ تسجيل الدخول...");
-
-    let {data,error}=await client.auth.signInWithPassword({email,password});
-
-    if(error){
-        say("loginmsg","تعذر تسجيل الدخول: "+error.message);
-        return;
-    }
-
-    let {data:prof}=await client.from("profiles")
-        .select("role").eq("id",data.user.id).single();
-
-    if(!prof||String(prof.role).trim().toLowerCase()!==$("accountType").value){
+      }
+      role = String(profile.role || "").trim().toLowerCase();
+      if (role !== "admin" && role !== "user") {
         await client.auth.signOut();
-        say("loginmsg","نوع الحساب المختار لا يطابق صلاحية هذا المستخدم.");
+        say("loginmsg", "صلاحية هذا المستخدم غير معروفة.");
         return;
+      }
+      $("loginbox").style.display = "none";
+      $("app").style.display = "block";
+      $("q").placeholder = isAdmin() ? "ابحث بالاسم أو الموبايل أو المنطقة…" : "ابحث بالاسم أو المنطقة…";
+      await load();
+      await setView("requests");
+    }
+    function showLogin() {
+      $("app").style.display = "none";
+      $("loginbox").style.display = "block";
+      currentUser = null;
+      role = "user";
     }
 
-    await logEvent("login",{email});
-    await enterApp(data.user);
-};
-
-// تسجيل الخروج
-$("logout").onclick=async()=>{
-
-    await logEvent("logout",{});
-    await client.auth.signOut();
-
-    data=[];
-    await showLogin();
-
-    say("loginmsg","تم تسجيل الخروج");
-};
-
-// زر إضافة الطلب - الأدمن فقط
-$("add").onclick=function(e){
-
-    e.preventDefault();
-
-    if(!isAdmin()){
-        alert("إضافة الطلبات متاحة للأدمن فقط");
-        return;
-    }
-
-    openForm(null);
-};
-
-// إلغاء النموذج
-$("cn").onclick=()=>$("dg").close();
-$("feedbackCancel").onclick=()=>$("feedbackDialog").close();
-
-// حفظ الطلب
-$("fm").onsubmit=async e=>{
-
-    e.preventDefault();
-
-    if(!isAdmin()){
-        alert("غير مسموح لك بإضافة الطلبات");
-        return;
-    }
-
-    let old=editId?data.find(x=>x.id===editId):null;
-
-    let o={
-        name:$("nm").value.trim(),
-        phone:$("ph").value.trim(),
-        type:$("ty").value,
-        ptype:$("pt").value,
-        area:$("ar").value.trim(),
-        budget:$("bu").value.trim(),
-        agent:$("am").value.trim(),
-        priority:$("pr").value,
-        notes:$("no").value.trim(),
-        status:old?.status||"new",
-        createdAt:old?.createdAt||Date.now(),
-        updatedAt:Date.now(),
-        feedback_reason:old?.feedback_reason||null,
-        feedback_details:old?.feedback_details||null
+    $("login").onclick = async () => {
+      const email = $("email").value.trim(), password = $("password").value;
+      if (!email || !password) return say("loginmsg", "اكتب البريد الإلكتروني وكلمة المرور");
+      say("loginmsg", "جارٍ تسجيل الدخول...");
+      $("login").disabled = true;
+      const { data:result, error } = await client.auth.signInWithPassword({ email, password });
+      $("login").disabled = false;
+      if (error) return say("loginmsg", "تعذّر تسجيل الدخول: " + error.message);
+      const { data:prof } = await client.from("profiles")
+        .select("role").eq("id", result.user.id).single();
+      if (!prof || String(prof.role).trim().toLowerCase() !== $("accountType").value) {
+        await client.auth.signOut();
+        return say("loginmsg", "نوع الحساب المختار لا يطابق صلاحية هذا المستخدم.");
+      }
+      await logEvent("login", { email });
+      await enterApp(result.user);
     };
-
-    if(!o.name)return;
-
-    await save(
-        editId||("r"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),
-        o
-    );
-};
-
-// إنهاء الطلب
-$("feedbackForm").onsubmit=async e=>{
-
-    e.preventDefault();
-
-    if(!isAdmin()||!finishId)return;
-
-    let reason=$("feedbackReason").value;
-    let details=$("feedbackDetails").value.trim();
-
-    let {error}=await client.from("requests").update({
-        status:"done",
-        feedback_reason:reason,
-        feedback_details:details,
-        updated_at:Date.now()
-    }).eq("id",finishId);
-
-    if(error){
-        alert("تعذر إنهاء الطلب: "+error.message);
-        return;
-    }
-
-    $("feedbackDialog").close();
-    $("feedbackDetails").value="";
-    finishId=null;
-
-    await load();
-};
-
-// الفلاتر
-$("tb").onclick=e=>{
-    let t=e.target.getAttribute("data-t");
-    if(t){
-        tab=t;
-        render();
-    }
-};
-
-$("q").oninput=render;
-$("ag").onchange=render;
-
-// أزرار الطلبات
-$("ls").onclick=e=>{
-
-    let b=e.target.closest("button[data-a]");
-
-    if(!b||!isAdmin())return;
-
-    let a=b.dataset.a;
-    let id=b.dataset.i;
-
-    if(a==="edit")openForm(data.find(x=>x.id===id));
-
-    if(a==="del")removeRequest(id);
-
-    if(a==="finish"){
-        finishId=id;
-        $("feedbackDialog").showModal();
-    }
-
-    if(a==="reopen"){
+    $("logout").onclick = async () => {
+      await logEvent("logout", {});
+      await client.auth.signOut();
+      data = []; properties = []; logs = [];
+      showLogin();
+      say("loginmsg", "تم تسجيل الخروج");
+    };
+    $("add").onclick = e => { e.preventDefault(); openForm(null); };
+    $("cn").onclick = () => $("dg").close();
+    $("feedbackCancel").onclick = () => $("feedbackDialog").close();
+    $("fm").onsubmit = async e => {
+      e.preventDefault();
+      if (!isAdmin()) return alert("غير مسموح لك بإضافة الطلبات");
+      const old = editId ? data.find(x => x.id === editId) : null;
+      const o = {
+        name:$("nm").value.trim(), phone:$("ph").value.trim(), type:$("ty").value,
+        ptype:$("pt").value, area:$("ar").value.trim(), budget:$("bu").value.trim(),
+        agent:$("am").value.trim(), priority:$("pr").value, notes:$("no").value.trim(),
+        status:old?.status || "new", createdAt:old?.createdAt || Date.now(), updatedAt:Date.now(),
+        feedback_reason:old?.feedback_reason || null, feedback_details:old?.feedback_details || null
+      };
+      if (!o.name) return;
+      await save(editId || ("r" + Date.now().toString(36) + Math.random().toString(36).slice(2,6)), o);
+    };
+    $("feedbackForm").onsubmit = async e => {
+      e.preventDefault();
+      if (!isAdmin() || !finishId) return;
+      const { error } = await client.from("requests").update({
+        status:"done", feedback_reason:$("feedbackReason").value,
+        feedback_details:$("feedbackDetails").value.trim(), updated_at:Date.now()
+      }).eq("id", finishId);
+      if (error) return alert("تعذّر إنهاء الطلب: " + error.message);
+      $("feedbackDialog").close();
+      $("feedbackDetails").value = "";
+      finishId = null;
+      await load();
+    };
+    $("tb").onclick = e => {
+      const btn = e.target.closest("button[data-t]");
+      if (btn) { tab = btn.dataset.t; render(); }
+    };
+    $("q").oninput = render;
+    $("ag").onchange = render;
+    $("ls").onclick = e => {
+      const btn = e.target.closest("button[data-a]");
+      if (!btn || !isAdmin()) return;
+      const id = btn.dataset.i;
+      if (btn.dataset.a === "edit") openForm(data.find(x => x.id === id));
+      if (btn.dataset.a === "del") removeRequest(id);
+      if (btn.dataset.a === "finish") { finishId = id; $("feedbackDialog").showModal(); }
+      if (btn.dataset.a === "reopen") {
         client.from("requests").update({
-            status:"act",
-            feedback_reason:null,
-            feedback_details:null,
-            updated_at:Date.now()
-        }).eq("id",id).then(({error})=>
-            error?alert(error.message):load()
-        );
-    }
-};
-
-// التنقل بين الأقسام
-$("showRequests").onclick=()=>setView("requests");
-$("showProperties").onclick=()=>setView("properties");
-$("showLogs").onclick=()=>isAdmin()&&setView("logs");
-
-// مخزون الشقق
-$("addProperty").onclick=()=>isAdmin()&&openPropertyForm(null);
-$("propertyCancel").onclick=()=>$("propertyDialog").close();
-
-$("propertyForm").onsubmit=async e=>{
-    e.preventDefault();
-    await saveProperty();
-};
-
-$("pq").oninput=renderProperties;
-$("pstatus").onchange=renderProperties;
-
-$("propertyList").onclick=e=>{
-
-    let b=e.target.closest("button[data-pa]");
-
-    if(!b||!isAdmin())return;
-
-    let x=properties.find(p=>p.id===b.dataset.pid);
-
-    if(b.dataset.pa==="edit")openPropertyForm(x);
-
-    if(b.dataset.pa==="delete")deleteProperty(b.dataset.pid);
-};
-
-// سجل النشاط
-$("logType").onchange=renderLogs;
-$("logSearch").oninput=renderLogs;
-
-// استعادة الجلسة
-client.auth.getSession().then(async r=>{
-
-    if(r.data.session)
-        await enterApp(r.data.session.user);
-    else
-        await showLogin();
-
-});
-
-client.auth.onAuthStateChange(async(event,session)=>{
-
-    if(event==="SIGNED_OUT")
-        await showLogin();
-
-});
-
-})();
-</script>
+          status:"act", feedback_reason:null, feedback_details:null, updated_at:Date.now()
+        }).eq("id", id).then(({ error }) => error ? alert(error.message) : load());
+      }
+    };
+    $("showRequests").onclick = () => setView("requests");
+    $("showProperties").onclick = () => setView("properties");
+    $("showLogs").onclick = () => setView("logs");
+    $("addProperty").onclick = () => openPropertyForm(null);
+    $("propertyCancel").onclick = () => $("propertyDialog").close();
+    $("propertyForm").onsubmit = async e => { e.preventDefault(); await saveProperty(); };
+    $("pq").oninput = renderProperties;
+    $("pstatus").onchange = renderProperties;
+    $("propertyList").onclick = e => {
+      const btn = e.target.closest("button[data-pa]");
+      if (!btn) return;
+      const id = String(btn.dataset.pid), action = btn.dataset.pa;
+      if (action === "toggle") {
+        if (collapsedPropertyIds.has(id)) collapsedPropertyIds.delete(id);
+        else collapsedPropertyIds.add(id);
+        renderProperties();
+        return;
+      }
+      if (!isAdmin()) return;
+      const x = properties.find(p => String(p.id) === id);
+      if (action === "edit" && x) openPropertyForm(x);
+      if (action === "delete") deleteProperty(id);
+    };
+    $("collapseAll").onclick = () => {
+      properties.forEach(p => collapsedPropertyIds.add(String(p.id)));
+      renderProperties();
+    };
+    $("expandAll").onclick = () => { collapsedPropertyIds.clear(); renderProperties(); };
+    $("logType").onchange = renderLogs;
+    $("logSearch").oninput = renderLogs;
+    client.auth.getSession().then(async ({ data:sessionData }) => {
+      if (sessionData.session) await enterApp(sessionData.session.user);
+      else showLogin();
+    }).catch(() => { showLogin(); say("loginmsg", "تعذّر استعادة الجلسة"); });
+    client.auth.onAuthStateChange(event => { if (event === "SIGNED_OUT") showLogin(); });
+  })();
+  </script>
 </body>
-</html>
+    </html>
